@@ -1,0 +1,417 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ENUMS
+// ═══════════════════════════════════════════════════════════════════
+
+enum UserRole {
+  ADMIN
+  GUARDIAN
+  STAFF
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  TRANSBANK
+  TRANSFER
+  CASH
+}
+
+enum PassType {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum AttendanceStatus {
+  CHECKED_IN
+  CHECKED_OUT
+  ABSENT
+}
+
+enum WorkshopDay {
+  TUESDAY
+  WEDNESDAY
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MODELOS PRINCIPALES
+// ═══════════════════════════════════════════════════════════════════
+
+model User {
+  id                   String    @id @default(cuid())
+  email                String    @unique
+  password             String
+  firstName            String    @map("first_name")
+  lastName             String    @map("last_name")
+  phone                String?
+  rut                  String?   @unique
+  role                 UserRole  @default(GUARDIAN)
+  isActive             Boolean   @default(true) @map("is_active")
+  emailVerified        Boolean   @default(false) @map("email_verified")
+  profileImage         String?   @map("profile_image")
+  refreshToken         String?   @map("refresh_token")
+  resetPasswordToken   String?   @map("reset_password_token")
+  resetPasswordExpires DateTime? @map("reset_password_expires")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+  lastLoginAt          DateTime? @map("last_login_at")
+
+  children           Child[]        @relation("GuardianChildren")
+  attendancesAsStaff Attendance[]   @relation("StaffAttendances")
+  paymentsAsGuardian Payment[]      @relation("GuardianPayments")
+  paymentsAsPayer    Payment[]      @relation("PayerPayments")
+  notifications      Notification[]
+
+  @@map("users")
+}
+
+model Child {
+  id                       String    @id @default(cuid())
+  firstName                String    @map("first_name")
+  lastName                 String    @map("last_name")
+  birthDate                DateTime  @map("birth_date")
+  gender                   String?
+  profileImage             String?   @map("profile_image")
+  schoolName               String?   @map("school_name")
+  schoolGrade              String?   @map("school_grade")
+  allergies                String[]  @default([])
+  medicalConditions        String[]  @default([]) @map("medical_conditions")
+  medications              String[]  @default([])
+  bloodType                String?   @map("blood_type")
+  emergencyContactName     String    @map("emergency_contact_name")
+  emergencyContactPhone    String    @map("emergency_contact_phone")
+  emergencyContactRelation String    @map("emergency_contact_relation")
+  familyNotes              String?   @map("family_notes")
+  hasSiblings              Boolean   @default(false) @map("has_siblings")
+  siblingsInfo             String?   @map("siblings_info")
+  isActive                 Boolean   @default(true) @map("is_active")
+  createdAt                DateTime  @default(now()) @map("created_at")
+  updatedAt                DateTime  @updatedAt @map("updated_at")
+
+  guardianId String @map("guardian_id")
+  guardian   User   @relation("GuardianChildren", fields: [guardianId], references: [id])
+
+  preferences         ChildPreferences?
+  attendances         Attendance[]
+  bookings            Booking[]
+  workshopEnrollments WorkshopEnrollment[]
+  observations        ChildObservation[]
+
+  @@map("children")
+}
+
+model ChildPreferences {
+  id                 String   @id @default(cuid())
+  physicalActivity   Boolean  @default(false) @map("physical_activity")
+  musicReinforcement Boolean  @default(false) @map("music_reinforcement")
+  socialDevelopment  Boolean  @default(false) @map("social_development")
+  germanLanguage     Boolean  @default(false) @map("german_language")
+  englishLanguage    Boolean  @default(false) @map("english_language")
+  customPlan         String?  @map("custom_plan") @db.Text
+  additionalNotes    String?  @map("additional_notes") @db.Text
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  childId String @unique @map("child_id")
+  child   Child  @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@map("child_preferences")
+}
+
+model ChildObservation {
+  id         String   @id @default(cuid())
+  content    String   @db.Text
+  isInternal Boolean  @default(true) @map("is_internal")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  childId     String @map("child_id")
+  child       Child  @relation(fields: [childId], references: [id], onDelete: Cascade)
+  createdById String @map("created_by_id")
+
+  @@map("child_observations")
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// AGENDAMIENTO Y ASISTENCIA
+// ═══════════════════════════════════════════════════════════════════
+
+model Booking {
+  id              String        @id @default(cuid())
+  date            DateTime      @db.Date
+  passType        PassType      @map("pass_type")
+  status          BookingStatus @default(PENDING)
+  weeklyFrequency Int?          @map("weekly_frequency")
+  unitPrice       Decimal       @map("unit_price") @db.Decimal(10, 2)
+  totalPrice      Decimal       @map("total_price") @db.Decimal(10, 2)
+  discountApplied Decimal?      @map("discount_applied") @db.Decimal(10, 2)
+  notes           String?       @db.Text
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  confirmedAt     DateTime?     @map("confirmed_at")
+  cancelledAt     DateTime?     @map("cancelled_at")
+
+  childId String @map("child_id")
+  child   Child  @relation(fields: [childId], references: [id])
+
+  slotId String   @map("slot_id")
+  slot   TimeSlot @relation(fields: [slotId], references: [id])
+
+  payment    Payment?
+  attendance Attendance?
+
+  @@unique([childId, date, slotId])
+  @@map("bookings")
+}
+
+model TimeSlot {
+  id          String   @id @default(cuid())
+  name        String
+  startTime   String   @map("start_time")
+  endTime     String   @map("end_time")
+  maxCapacity Int      @map("max_capacity")
+  isActive    Boolean  @default(true) @map("is_active")
+  daysOfWeek  Int[]    @default([1, 2, 3, 4, 5]) @map("days_of_week")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  bookings Booking[]
+
+  @@map("time_slots")
+}
+
+model Attendance {
+  id           String           @id @default(cuid())
+  date         DateTime         @db.Date
+  status       AttendanceStatus @default(CHECKED_IN)
+  checkInTime  DateTime?        @map("check_in_time")
+  checkOutTime DateTime?        @map("check_out_time")
+  notes        String?          @db.Text
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+
+  childId String @map("child_id")
+  child   Child  @relation(fields: [childId], references: [id])
+
+  staffId String @map("staff_id")
+  staff   User   @relation("StaffAttendances", fields: [staffId], references: [id])
+
+  bookingId String?  @unique @map("booking_id")
+  booking   Booking? @relation(fields: [bookingId], references: [id])
+
+  @@unique([childId, date])
+  @@map("attendances")
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PAGOS Y FACTURACIÓN
+// ═══════════════════════════════════════════════════════════════════
+
+model Payment {
+  id                String        @id @default(cuid())
+  amount            Decimal       @db.Decimal(10, 2)
+  status            PaymentStatus @default(PENDING)
+  method            PaymentMethod @default(TRANSBANK)
+  transbankToken    String?       @map("transbank_token")
+  transbankOrderId  String?       @map("transbank_order_id")
+  transbankResponse Json?         @map("transbank_response")
+  discountPercent   Decimal?      @map("discount_percent") @db.Decimal(5, 2)
+  discountAmount    Decimal?      @map("discount_amount") @db.Decimal(10, 2)
+  finalAmount       Decimal       @map("final_amount") @db.Decimal(10, 2)
+  payerName         String?       @map("payer_name")
+  payerEmail        String?       @map("payer_email")
+  payerRut          String?       @map("payer_rut")
+  dueDate           DateTime?     @map("due_date") @db.Date
+  paidAt            DateTime?     @map("paid_at")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  guardianId String @map("guardian_id")
+  guardian   User   @relation("GuardianPayments", fields: [guardianId], references: [id])
+
+  payerId String? @map("payer_id")
+  payer   User?   @relation("PayerPayments", fields: [payerId], references: [id])
+
+  bookingId String  @unique @map("booking_id")
+  booking   Booking @relation(fields: [bookingId], references: [id])
+
+  invoice Invoice?
+
+  @@map("payments")
+}
+
+model Invoice {
+  id            String   @id @default(cuid())
+  invoiceNumber String   @unique @map("invoice_number")
+  rut           String?
+  businessName  String?  @map("business_name")
+  address       String?
+  netAmount     Decimal  @map("net_amount") @db.Decimal(10, 2)
+  taxAmount     Decimal  @map("tax_amount") @db.Decimal(10, 2)
+  totalAmount   Decimal  @map("total_amount") @db.Decimal(10, 2)
+  pdfUrl        String?  @map("pdf_url")
+  issuedAt      DateTime @default(now()) @map("issued_at")
+  sentAt        DateTime? @map("sent_at")
+
+  paymentId String  @unique @map("payment_id")
+  payment   Payment @relation(fields: [paymentId], references: [id])
+
+  @@map("invoices")
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TALLERES
+// ═══════════════════════════════════════════════════════════════════
+
+model Workshop {
+  id              String      @id @default(cuid())
+  name            String
+  description     String?     @db.Text
+  dayOfWeek       WorkshopDay @map("day_of_week")
+  startTime       String      @map("start_time")
+  endTime         String      @map("end_time")
+  maxCapacity     Int         @map("max_capacity")
+  additionalPrice Decimal?    @map("additional_price") @db.Decimal(10, 2)
+  isActive        Boolean     @default(true) @map("is_active")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  enrollments WorkshopEnrollment[]
+
+  @@map("workshops")
+}
+
+model WorkshopEnrollment {
+  id         String   @id @default(cuid())
+  isActive   Boolean  @default(true) @map("is_active")
+  enrolledAt DateTime @default(now()) @map("enrolled_at")
+
+  childId String @map("child_id")
+  child   Child  @relation(fields: [childId], references: [id])
+
+  workshopId String   @map("workshop_id")
+  workshop   Workshop @relation(fields: [workshopId], references: [id])
+
+  @@unique([childId, workshopId])
+  @@map("workshop_enrollments")
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CONFIGURACIÓN DEL SISTEMA
+// ═══════════════════════════════════════════════════════════════════
+
+model SystemSettings {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       Json
+  description String?
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  updatedById String?  @map("updated_by_id")
+
+  @@map("system_settings")
+}
+
+model PricingConfig {
+  id              String   @id @default(cuid())
+  weeklyFrequency Int      @unique @map("weekly_frequency")
+  pricePerSession Decimal  @map("price_per_session") @db.Decimal(10, 2)
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("pricing_configs")
+}
+
+model DiscountConfig {
+  id                   String   @id @default(cuid())
+  name                 String
+  percentage           Decimal  @db.Decimal(5, 2)
+  description          String?
+  requiresEarlyPayment Boolean  @default(false) @map("requires_early_payment")
+  earlyPaymentDay      Int?     @map("early_payment_day")
+  isActive             Boolean  @default(true) @map("is_active")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  @@map("discount_configs")
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// NOTIFICACIONES
+// ═══════════════════════════════════════════════════════════════════
+
+model Notification {
+  id          String    @id @default(cuid())
+  type        String
+  title       String
+  message     String    @db.Text
+  isRead      Boolean   @default(false) @map("is_read")
+  readAt      DateTime? @map("read_at")
+  emailSent   Boolean   @default(false) @map("email_sent")
+  emailSentAt DateTime? @map("email_sent_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CONTENIDO EDITABLE
+// ═══════════════════════════════════════════════════════════════════
+
+model ContentBlock {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  content   String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("content_blocks")
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// AUDITORÍA
+// ═══════════════════════════════════════════════════════════════════
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id")
+  oldData    Json?    @map("old_data")
+  newData    Json?    @map("new_data")
+  ipAddress  String?  @map("ip_address")
+  userAgent  String?  @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at")
+  userId     String?  @map("user_id")
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@map("audit_logs")
+}
