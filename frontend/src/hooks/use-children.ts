@@ -6,11 +6,15 @@ import { useAuthStore } from '@/stores/auth-store';
 import type { Child, PaginatedResponse } from '@/types';
 
 export function useChildren() {
-  const { accessToken } = useAuthStore();
+  const { accessToken, user } = useAuthStore();
+  const isGuardian = user?.role === 'GUARDIAN';
 
   return useQuery({
-    queryKey: ['children'],
-    queryFn: () => api.get<PaginatedResponse<Child>>('/children', accessToken ?? undefined),
+    queryKey: ['children', isGuardian ? 'my-children' : 'all'],
+    queryFn: () => {
+      const endpoint = isGuardian ? '/children/my-children' : '/children';
+      return api.get<PaginatedResponse<Child>>(endpoint, accessToken ?? undefined);
+    },
     enabled: !!accessToken,
   });
 }

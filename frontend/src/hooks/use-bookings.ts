@@ -6,11 +6,15 @@ import { useAuthStore } from '@/stores/auth-store';
 import type { Booking, TimeSlot, PricingConfig, PaginatedResponse } from '@/types';
 
 export function useBookings() {
-  const { accessToken } = useAuthStore();
+  const { accessToken, user } = useAuthStore();
+  const isGuardian = user?.role === 'GUARDIAN';
 
   return useQuery({
-    queryKey: ['bookings'],
-    queryFn: () => api.get<PaginatedResponse<Booking>>('/bookings', accessToken ?? undefined),
+    queryKey: ['bookings', isGuardian ? 'my-bookings' : 'all'],
+    queryFn: () => {
+      const endpoint = isGuardian ? '/bookings/my-bookings' : '/bookings';
+      return api.get<PaginatedResponse<Booking>>(endpoint, accessToken ?? undefined);
+    },
     enabled: !!accessToken,
   });
 }
