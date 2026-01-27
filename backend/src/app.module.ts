@@ -16,6 +16,7 @@ import { ReportsModule } from './modules/reports/reports.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { InvoicesModule } from './modules/invoices/invoices.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 import configuration from './config/configuration';
 
@@ -49,6 +50,7 @@ import configuration from './config/configuration';
     NotificationsModule,
     InvoicesModule,
     UploadsModule,
+    DashboardModule,
   ],
 })
 export class AppModule {}

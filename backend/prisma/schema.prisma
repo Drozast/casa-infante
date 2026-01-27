@@ -121,6 +121,7 @@ model Child {
   workshopEnrollments WorkshopEnrollment[]
   observations        ChildObservation[]
 
+  @@index([guardianId])
   @@map("children")
 }
 
@@ -184,6 +185,10 @@ model Booking {
   attendance Attendance?
 
   @@unique([childId, date, slotId])
+  @@index([childId])
+  @@index([status])
+  @@index([date, status])
+  @@index([slotId, date, status])
   @@map("bookings")
 }
 
@@ -223,6 +228,9 @@ model Attendance {
   booking   Booking? @relation(fields: [bookingId], references: [id])
 
   @@unique([childId, date])
+  @@index([childId])
+  @@index([staffId])
+  @@index([date])
   @@map("attendances")
 }
 
@@ -260,6 +268,8 @@ model Payment {
 
   invoice Invoice?
 
+  @@index([guardianId, status])
+  @@index([status])
   @@map("payments")
 }
 
@@ -377,6 +387,7 @@ model Notification {
   userId String @map("user_id")
   user   User   @relation(fields: [userId], references: [id])
 
+  @@index([userId, isRead])
   @@map("notifications")
 }
 

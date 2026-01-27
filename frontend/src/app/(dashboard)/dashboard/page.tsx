@@ -1,9 +1,7 @@
 'use client';
 
 import { useAuthStore } from '@/stores/auth-store';
-import { useChildren } from '@/hooks/use-children';
-import { useBookings } from '@/hooks/use-bookings';
-import { usePendingPayments } from '@/hooks/use-payments';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -40,6 +38,39 @@ function formatDate(date: string): string {
 }
 
 const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+interface DashboardChild {
+  id: string;
+  firstName: string;
+  lastName: string;
+  schoolName?: string | null;
+}
+
+interface DashboardSlot {
+  id: string;
+  name: string;
+  daysOfWeek?: number[];
+}
+
+interface DashboardBooking {
+  id: string;
+  date: string;
+  status: string;
+  totalPrice: number | string;
+  child?: { firstName: string; lastName: string };
+  slot?: DashboardSlot;
+}
+
+interface DashboardPayment {
+  id: string;
+  amount: number | string;
+}
+
+interface DashboardData {
+  children: DashboardChild[];
+  bookings: DashboardBooking[];
+  pendingPayments: DashboardPayment[];
+}
 
 // Hook para animaciones al scroll
 function useInView(threshold = 0.1) {
@@ -92,15 +123,26 @@ function AnimateOnScroll({
 }
 
 export default function DashboardPage() {
-  const { user } = useAuthStore();
-  const { data: childrenData, isLoading: loadingChildren } = useChildren();
-  const { data: bookingsData, isLoading: loadingBookings } = useBookings();
-  const { data: pendingPayments, isLoading: loadingPayments } = usePendingPayments();
+  const { user, accessToken } = useAuthStore();
 
-  const children = childrenData?.data || [];
-  const bookings = bookingsData?.data || [];
+  const { data: dashboardData, isLoading } = useQuery<DashboardData>({
+    queryKey: ['dashboard-summary'],
+    queryFn: async () => {
+      const res = await fetch('/api/dashboard', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!res.ok) throw new Error('Error cargando dashboard');
+      const json = await res.json();
+      return json?.data || json;
+    },
+    enabled: !!accessToken,
+  });
+
+  const children = dashboardData?.children || [];
+  const bookings = dashboardData?.bookings || [];
   const activeBookings = bookings.filter((b) => b.status === 'CONFIRMED');
-  const totalPending = pendingPayments?.reduce((sum, p) => sum + p.amount, 0) || 0;
+  const pendingPayments = dashboardData?.pendingPayments || [];
+  const totalPending = pendingPayments.reduce((sum, p) => sum + Number(p.amount), 0);
 
   return (
     <div className="space-y-8 pb-8">
@@ -163,7 +205,7 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="relative">
                 <div className="text-3xl font-bold text-lime-600">
-                  {loadingChildren ? '...' : children.length}
+                  {isLoading ? '...' : children.length}
                 </div>
               </CardContent>
             </Card>
@@ -182,7 +224,7 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="relative">
                 <div className="text-3xl font-bold text-blue-600">
-                  {loadingBookings ? '...' : activeBookings.length}
+                  {isLoading ? '...' : activeBookings.length}
                 </div>
               </CardContent>
             </Card>
@@ -201,7 +243,7 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="relative">
                 <div className="text-3xl font-bold text-orange-600">
-                  {loadingPayments ? '...' : pendingPayments?.length || 0}
+                  {isLoading ? '...' : pendingPayments?.length || 0}
                 </div>
               </CardContent>
             </Card>
@@ -220,7 +262,7 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="relative">
                 <div className="text-2xl font-bold text-green-600">
-                  {loadingPayments ? '...' : formatCurrency(totalPending)}
+                  {isLoading ? '...' : formatCurrency(totalPending)}
                 </div>
               </CardContent>
             </Card>
@@ -251,7 +293,7 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent>
-              {loadingChildren ? (
+              {isLoading ? (
                 <div className="text-center py-8">
                   <div className="animate-spin h-8 w-8 border-4 border-lime-500 border-t-transparent rounded-full mx-auto" />
                   <p className="text-muted-foreground mt-2">Cargando...</p>
@@ -329,7 +371,7 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent>
-              {loadingBookings ? (
+              {isLoading ? (
                 <div className="text-center py-8">
                   <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto" />
                   <p className="text-muted-foreground mt-2">Cargando...</p>

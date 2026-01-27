@@ -125,6 +125,7 @@ services:
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.casainfante.drozast.xyz}
+      INTERNAL_API_URL: http://backend:3031/api/v1
     ports:
       - "3040:3000"
     networks:
