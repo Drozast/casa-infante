@@ -18,7 +18,11 @@ const registerSchema = z.object({
   lastName: z.string().min(2, 'El apellido debe tener al menos 2 caracteres'),
   email: z.string().email('Correo electronico invalido'),
   phone: z.string().regex(/^\+?[0-9]{9,15}$/, 'Numero de telefono invalido').optional().or(z.literal('')),
-  password: z.string().min(6, 'La contrasena debe tener al menos 6 caracteres'),
+  password: z.string()
+    .min(8, 'La contrasena debe tener al menos 8 caracteres')
+    .regex(/[A-Z]/, 'Debe incluir al menos una letra mayuscula')
+    .regex(/[0-9]/, 'Debe incluir al menos un numero')
+    .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, 'Debe incluir al menos un simbolo'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Las contrasenas no coinciden',
@@ -195,7 +199,7 @@ export default function RegisterPage() {
                     <Input
                       id="password"
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="Minimo 6 caracteres"
+                      placeholder="Minimo 8 caracteres, 1 mayuscula, 1 numero, 1 simbolo"
                       className="h-11 border-gray-200 focus:border-lime-500 focus:ring-lime-500 pr-12"
                       {...register('password')}
                     />

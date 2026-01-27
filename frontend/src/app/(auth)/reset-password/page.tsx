@@ -17,7 +17,11 @@ import { useToast } from '@/components/ui/use-toast';
 import { ArrowLeft, Loader2, Eye, EyeOff, CheckCircle, AlertCircle, KeyRound, Shield, Lock } from 'lucide-react';
 
 const resetPasswordSchema = z.object({
-  newPassword: z.string().min(6, 'La contrasena debe tener al menos 6 caracteres'),
+  newPassword: z.string()
+    .min(8, 'La contrasena debe tener al menos 8 caracteres')
+    .regex(/[A-Z]/, 'Debe incluir al menos una letra mayuscula')
+    .regex(/[0-9]/, 'Debe incluir al menos un numero')
+    .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, 'Debe incluir al menos un simbolo'),
   confirmPassword: z.string(),
 }).refine((data) => data.newPassword === data.confirmPassword, {
   message: 'Las contrasenas no coinciden',
@@ -122,7 +126,7 @@ function ResetPasswordContent() {
                 <Input
                   id="newPassword"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Minimo 6 caracteres"
+                  placeholder="Minimo 8 caracteres, 1 mayuscula, 1 numero, 1 simbolo"
                   className="h-12 border-gray-200 focus:border-lime-500 focus:ring-lime-500 pr-12"
                   {...register('newPassword')}
                 />

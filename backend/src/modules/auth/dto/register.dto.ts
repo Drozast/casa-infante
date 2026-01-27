@@ -13,10 +13,13 @@ export class RegisterDto {
   @IsEmail({}, { message: 'Correo electrónico inválido' })
   email: string;
 
-  @ApiProperty({ example: 'password123' })
+  @ApiProperty({ example: 'Password1!' })
   @IsString()
-  @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
+  @MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
   @MaxLength(50)
+  @Matches(/^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/, {
+    message: 'La contraseña debe incluir al menos una mayúscula, un número y un símbolo',
+  })
   password: string;
 
   @ApiProperty({ example: 'María' })

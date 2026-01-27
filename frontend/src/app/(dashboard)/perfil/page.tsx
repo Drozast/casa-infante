@@ -21,7 +21,11 @@ const profileSchema = z.object({
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, 'Ingresa tu contraseña actual'),
-  newPassword: z.string().min(6, 'La nueva contraseña debe tener al menos 6 caracteres'),
+  newPassword: z.string()
+    .min(8, 'La contraseña debe tener al menos 8 caracteres')
+    .regex(/[A-Z]/, 'Debe incluir al menos una letra mayúscula')
+    .regex(/[0-9]/, 'Debe incluir al menos un número')
+    .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, 'Debe incluir al menos un símbolo'),
   confirmPassword: z.string(),
 }).refine((data) => data.newPassword === data.confirmPassword, {
   message: 'Las contraseñas no coinciden',
