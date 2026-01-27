@@ -776,7 +776,7 @@ export default function LandingPage() {
                 Cuidado profesional con amor y dedicación.
               </p>
               <p className="text-gray-500 text-sm">
-                 2024 Casa Infante. Todos los derechos reservados.
+                © 2026 Casa Infante. Todos los derechos reservados.
               </p>
             </div>
             <div>

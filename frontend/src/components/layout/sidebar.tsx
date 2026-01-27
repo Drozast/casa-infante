@@ -69,9 +69,9 @@ export function Sidebar() {
       {/* Mobile menu button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed left-4 top-4 z-50 rounded-md bg-white p-2 shadow-md lg:hidden"
+        className="fixed left-4 top-4 z-50 rounded-lg bg-white p-2 shadow-md lg:hidden border border-lime-200 hover:bg-lime-50 transition-colors"
       >
-        {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        {isOpen ? <X className="h-6 w-6 text-lime-600" /> : <Menu className="h-6 w-6 text-lime-600" />}
       </button>
 
       {/* Overlay */}
@@ -90,12 +90,12 @@ export function Sidebar() {
         )}
       >
         {/* Header */}
-        <div className="flex h-16 items-center border-b px-6">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
+        <div className="flex h-16 items-center border-b border-lime-100 px-6 bg-gradient-to-r from-lime-50 to-white">
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-lime-600 text-sm font-bold text-white group-hover:bg-lime-700 transition-colors">
               CI
             </div>
-            <span className="text-lg font-semibold">Casa Infante</span>
+            <span className="text-lg font-semibold text-gray-800">Casa Infante</span>
           </Link>
         </div>
 
@@ -110,10 +110,10 @@ export function Sidebar() {
                     href={item.href}
                     onClick={() => setIsOpen(false)}
                     className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
                       isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                        ? 'bg-lime-600 text-white shadow-md'
+                        : 'text-gray-600 hover:bg-lime-50 hover:text-lime-700'
                     )}
                   >
                     <item.icon className="h-5 w-5" />
@@ -126,16 +126,16 @@ export function Sidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="border-t p-4">
-          <div className="mb-4 rounded-lg bg-muted p-3">
-            <p className="text-sm font-medium">
+        <div className="border-t border-lime-100 p-4">
+          <div className="mb-4 rounded-lg bg-lime-50 p-3">
+            <p className="text-sm font-medium text-gray-800">
               {user?.firstName} {user?.lastName}
             </p>
-            <p className="text-xs text-muted-foreground">{user?.email}</p>
+            <p className="text-xs text-gray-500">{user?.email}</p>
           </div>
           <Button
             variant="outline"
-            className="w-full justify-start"
+            className="w-full justify-start border-lime-200 hover:bg-lime-50 hover:text-lime-700 hover:border-lime-300 transition-colors"
             onClick={logout}
           >
             <LogOut className="mr-2 h-4 w-4" />
