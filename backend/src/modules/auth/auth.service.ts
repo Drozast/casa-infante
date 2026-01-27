@@ -7,7 +7,9 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { UserRole } from '@prisma/client';
@@ -18,6 +20,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private notificationsService: NotificationsService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -206,6 +209,92 @@ export class AuthService {
       where: { id: userId },
       data: { refreshToken: hashedRefreshToken },
     });
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
+
+    if (!user || !user.isActive) {
+      return { message: 'Si el correo está registrado, recibirás un enlace para restablecer tu contraseña' };
+    }
+
+    const rawToken = randomBytes(32).toString('hex');
+    const hashedToken = await bcrypt.hash(rawToken, 10);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetPasswordToken: hashedToken,
+        resetPasswordExpires: new Date(Date.now() + 60 * 60 * 1000),
+      },
+    });
+
+    const frontendUrl = this.configService.get<string>('frontend.url');
+    const resetLink = `${frontendUrl}/reset-password?token=${rawToken}`;
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #65a30d;">Restablecer Contraseña</h2>
+        <p>Hola ${user.firstName},</p>
+        <p>Recibimos una solicitud para restablecer tu contraseña. Haz clic en el siguiente enlace:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetLink}"
+             style="background-color: #65a30d; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+            Restablecer Contraseña
+          </a>
+        </div>
+        <p style="color: #666; font-size: 14px;">Este enlace expirará en 1 hora.</p>
+        <p style="color: #666; font-size: 14px;">Si no solicitaste este cambio, puedes ignorar este correo.</p>
+        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+        <p style="color: #999; font-size: 12px;">Casa Infante - Guardería AfterSchool</p>
+      </div>
+    `;
+
+    await this.notificationsService.sendEmail(
+      user.email,
+      'Restablecer Contraseña - Casa Infante',
+      html,
+    );
+
+    return { message: 'Si el correo está registrado, recibirás un enlace para restablecer tu contraseña' };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const usersWithResetToken = await this.prisma.user.findMany({
+      where: {
+        resetPasswordToken: { not: null },
+        resetPasswordExpires: { gt: new Date() },
+      },
+    });
+
+    let matchedUser = null;
+    for (const user of usersWithResetToken) {
+      const isMatch = await bcrypt.compare(token, user.resetPasswordToken!);
+      if (isMatch) {
+        matchedUser = user;
+        break;
+      }
+    }
+
+    if (!matchedUser) {
+      throw new BadRequestException('El enlace es inválido o ha expirado');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await this.prisma.user.update({
+      where: { id: matchedUser.id },
+      data: {
+        password: hashedPassword,
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
+        refreshToken: null,
+      },
+    });
+
+    return { message: 'Contraseña actualizada exitosamente' };
   }
 
   async changePassword(

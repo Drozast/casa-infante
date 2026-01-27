@@ -13,6 +13,8 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { JwtRefreshGuard } from './strategies/jwt-refresh.strategy';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -65,6 +67,22 @@ export class AuthController {
   @ApiOperation({ summary: 'Obtener perfil del usuario actual' })
   async getProfile(@CurrentUser('sub') userId: string) {
     return this.authService.getProfile(userId);
+  }
+
+  @Post('forgot-password')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Solicitar restablecimiento de contraseña' })
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto.email);
+  }
+
+  @Post('reset-password')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Restablecer contraseña con token' })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto.token, dto.newPassword);
   }
 
   @Post('change-password')
