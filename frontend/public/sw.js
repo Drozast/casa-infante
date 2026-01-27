@@ -1,4 +1,4 @@
-const CACHE_NAME = 'casa-infante-v2';
+const CACHE_NAME = 'casa-infante-v3';
 const STATIC_ASSETS = [
   '/offline',
   '/logo.png',
@@ -28,17 +28,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
-  // Never cache API requests
+  // Never intercept API requests - let the browser handle CORS natively
   if (event.request.url.includes('/api/')) {
-    event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          return new Response(
-            JSON.stringify({ error: 'offline' }),
-            { headers: { 'Content-Type': 'application/json' } }
-          );
-        })
-    );
     return;
   }
 
