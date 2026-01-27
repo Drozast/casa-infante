@@ -9,12 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-interface SystemSetting {
-  key: string;
-  value: string;
-  description?: string;
-}
-
 export default function AdminConfigPage() {
   const queryClient = useQueryClient();
   const { accessToken } = useAuthStore();
@@ -24,12 +18,12 @@ export default function AdminConfigPage() {
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings'],
-    queryFn: () => api.get<SystemSetting[]>('/settings', accessToken ?? undefined),
+    queryFn: () => api.get<Record<string, unknown>>('/settings', accessToken ?? undefined),
     enabled: !!accessToken,
   });
 
   const updateSetting = useMutation({
-    mutationFn: ({ key, value }: { key: string; value: string }) =>
+    mutationFn: ({ key, value }: { key: string; value: unknown }) =>
       api.put(`/settings/${key}`, { value }, accessToken ?? undefined),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] });
@@ -37,15 +31,11 @@ export default function AdminConfigPage() {
   });
 
   useEffect(() => {
-    if (settings) {
+    if (settings && typeof settings === 'object') {
       const data: Record<string, string> = {};
-      settings.forEach((s) => {
-        try {
-          data[s.key] = JSON.parse(s.value);
-        } catch {
-          data[s.key] = s.value;
-        }
-      });
+      for (const [key, value] of Object.entries(settings)) {
+        data[key] = typeof value === 'string' ? value : String(value ?? '');
+      }
       setFormData(data);
     }
   }, [settings]);
@@ -60,7 +50,7 @@ export default function AdminConfigPage() {
 
     try {
       const promises = Object.entries(formData).map(([key, value]) =>
-        updateSetting.mutateAsync({ key, value: JSON.stringify(value) })
+        updateSetting.mutateAsync({ key, value })
       );
       await Promise.all(promises);
       setMessage({ type: 'success', text: 'Configuración guardada correctamente' });
