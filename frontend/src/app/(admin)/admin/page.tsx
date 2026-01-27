@@ -216,25 +216,20 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-8 pb-8">
-      {/* Header con gradiente */}
+      {/* Header */}
       <AnimateOnScroll>
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-lime-500 via-lime-600 to-emerald-600 p-8 text-white shadow-xl">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-
-          <div className="relative">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="h-5 w-5 animate-pulse" />
-              <span className="text-lime-100 text-sm font-medium">Panel de Administración</span>
-            </div>
-            <h1 className="text-3xl font-bold mb-2">
-              ¡Bienvenido, {user?.firstName}!
-            </h1>
-            <p className="text-lime-100 max-w-xl">
-              Aquí puedes gestionar todos los aspectos de Casa Infante.
-              Revisa las estadísticas y accede rápidamente a las herramientas de gestión.
-            </p>
+        <div className="rounded-2xl bg-lime-600 p-8 text-white shadow-lg">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="h-5 w-5" />
+            <span className="text-lime-100 text-sm font-medium">Panel de Administración</span>
           </div>
+          <h1 className="text-3xl font-bold mb-2">
+            ¡Bienvenido, {user?.firstName}!
+          </h1>
+          <p className="text-lime-100 max-w-xl">
+            Aquí puedes gestionar todos los aspectos de Casa Infante.
+            Revisa las estadísticas y accede rápidamente a las herramientas de gestión.
+          </p>
         </div>
       </AnimateOnScroll>
 
@@ -311,7 +306,7 @@ export default function AdminDashboardPage() {
 
       {/* Tip Card */}
       <AnimateOnScroll delay={300}>
-        <Card className="bg-gradient-to-r from-lime-50 to-emerald-50 border-lime-200">
+        <Card className="bg-lime-50 border-lime-200">
           <CardContent className="flex items-center gap-4 py-6">
             <div className="p-3 rounded-full bg-lime-100">
               <Sparkles className="h-6 w-6 text-lime-600" />

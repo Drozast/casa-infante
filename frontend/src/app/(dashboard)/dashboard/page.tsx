@@ -104,31 +104,26 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 pb-8">
-      {/* Header con gradiente */}
+      {/* Header */}
       <AnimateOnScroll>
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-lime-500 via-lime-600 to-emerald-600 p-8 text-white shadow-xl">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-
-          <div className="relative">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="h-5 w-5 animate-pulse" />
-              <span className="text-lime-100 text-sm font-medium">Portal de Familias</span>
-            </div>
-            <h1 className="text-3xl font-bold mb-2">
-              ¡Hola, {user?.firstName}!
-            </h1>
-            <p className="text-lime-100 max-w-xl">
-              Bienvenido al portal de Casa Infante. Aquí puedes gestionar las inscripciones de tus hijos, ver reservas y pagos.
-            </p>
+        <div className="rounded-2xl bg-lime-600 p-8 text-white shadow-lg">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="h-5 w-5" />
+            <span className="text-lime-100 text-sm font-medium">Portal de Familias</span>
           </div>
+          <h1 className="text-3xl font-bold mb-2">
+            ¡Hola, {user?.firstName}!
+          </h1>
+          <p className="text-lime-100 max-w-xl">
+            Bienvenido al portal de Casa Infante. Aquí puedes gestionar las inscripciones de tus hijos, ver reservas y pagos.
+          </p>
         </div>
       </AnimateOnScroll>
 
       {/* Alerta de pagos pendientes */}
       {pendingPayments && pendingPayments.length > 0 && (
         <AnimateOnScroll delay={100}>
-          <Card className="border-2 border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 shadow-lg">
+          <Card className="border-2 border-orange-200 bg-orange-50 shadow-lg">
             <CardContent className="flex items-center gap-4 py-6">
               <div className="p-3 rounded-full bg-orange-100 animate-pulse">
                 <AlertCircle className="h-6 w-6 text-orange-600" />
@@ -277,7 +272,7 @@ export default function DashboardPage() {
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-lime-400 to-emerald-500 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
+                        <div className="h-12 w-12 rounded-full bg-lime-500 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
                           <span className="font-bold text-white text-lg">
                             {child.firstName[0]}
                           </span>
@@ -400,7 +395,7 @@ export default function DashboardPage() {
 
       {/* Quick Actions */}
       <AnimateOnScroll delay={300}>
-        <Card className="bg-gradient-to-r from-lime-50 to-emerald-50 border-lime-200">
+        <Card className="bg-lime-50 border-lime-200">
           <CardContent className="py-6">
             <div className="flex items-center gap-4 mb-4">
               <div className="p-2 rounded-full bg-lime-100">

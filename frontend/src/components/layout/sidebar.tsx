@@ -90,7 +90,7 @@ export function Sidebar() {
         )}
       >
         {/* Header */}
-        <div className="flex h-16 items-center border-b border-lime-100 px-6 bg-gradient-to-r from-lime-50 to-white">
+        <div className="flex h-16 items-center border-b border-lime-100 px-6 bg-lime-50">
           <Link href="/" className="flex items-center gap-2 group">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-lime-600 text-sm font-bold text-white group-hover:bg-lime-700 transition-colors">
               CI
