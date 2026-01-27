@@ -36,7 +36,7 @@ export default function AdminAttendancePage() {
   const bookings = bookingsData?.data || [];
   const activeBookings = bookings.filter((b) => b.status === 'CONFIRMED');
 
-  const handleMarkAttendance = async (childId: string, timeSlotId: string, status: AttendanceStatus) => {
+  const handleMarkAttendance = async (childId: string, slotId: string, status: AttendanceStatus) => {
     const existing = attendance?.find((a) => a.childId === childId && a.date === selectedDate);
 
     if (existing) {
@@ -48,7 +48,7 @@ export default function AdminAttendancePage() {
       await recordAttendance.mutateAsync({
         childId,
         date: selectedDate,
-        timeSlotId,
+        timeSlotId: slotId,
         status,
       });
     }
@@ -132,9 +132,9 @@ export default function AdminAttendancePage() {
                             {booking.child.firstName} {booking.child.lastName}
                           </p>
                         )}
-                        {booking.timeSlot && (
+                        {booking.slot && (
                           <p className="text-sm text-muted-foreground">
-                            {booking.timeSlot.name}
+                            {booking.slot.name}
                           </p>
                         )}
                       </div>
@@ -151,7 +151,7 @@ export default function AdminAttendancePage() {
                             key={status}
                             size="sm"
                             variant={currentStatus === status ? 'default' : 'outline'}
-                            onClick={() => handleMarkAttendance(booking.childId, booking.timeSlotId, status)}
+                            onClick={() => handleMarkAttendance(booking.childId, booking.slotId, status)}
                             disabled={recordAttendance.isPending || updateAttendance.isPending}
                           >
                             {STATUS_TEXT[status]}

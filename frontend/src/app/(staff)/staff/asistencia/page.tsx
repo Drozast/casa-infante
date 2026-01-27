@@ -200,9 +200,9 @@ export default function StaffAttendancePage() {
                             {booking.child.firstName} {booking.child.lastName}
                           </p>
                         )}
-                        {booking.timeSlot && (
+                        {booking.slot && (
                           <p className="text-sm text-muted-foreground">
-                            {booking.timeSlot.name}
+                            {booking.slot.name}
                           </p>
                         )}
                       </div>
@@ -218,7 +218,7 @@ export default function StaffAttendancePage() {
                           size="sm"
                           variant={currentStatus === 'PRESENT' ? 'default' : 'outline'}
                           className="bg-green-600 hover:bg-green-700 text-white"
-                          onClick={() => handleMarkAttendance(booking.childId, booking.timeSlotId, 'PRESENT')}
+                          onClick={() => handleMarkAttendance(booking.childId, booking.slotId, 'PRESENT')}
                           disabled={recordAttendance.isPending || updateAttendance.isPending}
                         >
                           P
@@ -227,7 +227,7 @@ export default function StaffAttendancePage() {
                           size="sm"
                           variant={currentStatus === 'ABSENT' ? 'default' : 'outline'}
                           className="bg-red-600 hover:bg-red-700 text-white"
-                          onClick={() => handleMarkAttendance(booking.childId, booking.timeSlotId, 'ABSENT')}
+                          onClick={() => handleMarkAttendance(booking.childId, booking.slotId, 'ABSENT')}
                           disabled={recordAttendance.isPending || updateAttendance.isPending}
                         >
                           A
@@ -236,7 +236,7 @@ export default function StaffAttendancePage() {
                           size="sm"
                           variant={currentStatus === 'LATE' ? 'default' : 'outline'}
                           className="bg-yellow-600 hover:bg-yellow-700 text-white"
-                          onClick={() => handleMarkAttendance(booking.childId, booking.timeSlotId, 'LATE')}
+                          onClick={() => handleMarkAttendance(booking.childId, booking.slotId, 'LATE')}
                           disabled={recordAttendance.isPending || updateAttendance.isPending}
                         >
                           T
@@ -245,7 +245,7 @@ export default function StaffAttendancePage() {
                           size="sm"
                           variant={currentStatus === 'EXCUSED' ? 'default' : 'outline'}
                           className="bg-blue-600 hover:bg-blue-700 text-white"
-                          onClick={() => handleMarkAttendance(booking.childId, booking.timeSlotId, 'EXCUSED')}
+                          onClick={() => handleMarkAttendance(booking.childId, booking.slotId, 'EXCUSED')}
                           disabled={recordAttendance.isPending || updateAttendance.isPending}
                         >
                           J

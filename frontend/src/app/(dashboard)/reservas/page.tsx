@@ -25,16 +25,20 @@ function formatDate(date: string): string {
 
 const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
-const STATUS_COLORS: Record<BookingStatus, string> = {
+const STATUS_COLORS: Record<string, string> = {
   PENDING: 'bg-yellow-100 text-yellow-800',
   CONFIRMED: 'bg-green-100 text-green-800',
   CANCELLED: 'bg-red-100 text-red-800',
+  COMPLETED: 'bg-blue-100 text-blue-800',
+  NO_SHOW: 'bg-gray-100 text-gray-800',
 };
 
-const STATUS_TEXT: Record<BookingStatus, string> = {
+const STATUS_TEXT: Record<string, string> = {
   PENDING: 'Pendiente',
   CONFIRMED: 'Confirmada',
   CANCELLED: 'Cancelada',
+  COMPLETED: 'Completada',
+  NO_SHOW: 'No Asistió',
 };
 
 export default function BookingsPage() {
@@ -125,7 +129,7 @@ export default function BookingsPage() {
                       {booking.child?.firstName} {booking.child?.lastName}
                     </CardTitle>
                     <CardDescription>
-                      {booking.timeSlot?.name} ({booking.timeSlot?.startTime} - {booking.timeSlot?.endTime})
+                      {booking.slot?.name} ({booking.slot?.startTime} - {booking.slot?.endTime})
                     </CardDescription>
                   </div>
                   <Badge className={STATUS_COLORS[booking.status]}>
@@ -138,7 +142,7 @@ export default function BookingsPage() {
                   <div>
                     <p className="text-sm text-muted-foreground">Días de asistencia</p>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {booking.selectedDays.map((day) => (
+                      {booking.slot?.daysOfWeek?.map((day) => (
                         <Badge key={day} variant="outline">
                           {DAY_NAMES[day]}
                         </Badge>
@@ -146,16 +150,16 @@ export default function BookingsPage() {
                     </div>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Fecha de inicio</p>
-                    <p className="font-medium">{formatDate(booking.startDate)}</p>
+                    <p className="text-sm text-muted-foreground">Fecha</p>
+                    <p className="font-medium">{formatDate(booking.date)}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Frecuencia</p>
-                    <p className="font-medium">{booking.weeklyFrequency}x por semana</p>
+                    <p className="font-medium">{booking.weeklyFrequency || '-'}x por semana</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Precio mensual</p>
-                    <p className="font-medium text-lg">{formatCurrency(booking.monthlyPrice)}</p>
+                    <p className="text-sm text-muted-foreground">Precio</p>
+                    <p className="font-medium text-lg">{formatCurrency(Number(booking.totalPrice))}</p>
                   </div>
                 </div>
 

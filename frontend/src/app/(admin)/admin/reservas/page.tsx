@@ -28,16 +28,20 @@ const DAYS_TEXT: Record<number, string> = {
   5: 'Vie',
 };
 
-const STATUS_COLORS: Record<BookingStatus, string> = {
+const STATUS_COLORS: Record<string, string> = {
   PENDING: 'bg-yellow-100 text-yellow-800',
   CONFIRMED: 'bg-green-100 text-green-800',
   CANCELLED: 'bg-red-100 text-red-800',
+  COMPLETED: 'bg-blue-100 text-blue-800',
+  NO_SHOW: 'bg-gray-100 text-gray-800',
 };
 
-const STATUS_TEXT: Record<BookingStatus, string> = {
+const STATUS_TEXT: Record<string, string> = {
   PENDING: 'Pendiente',
   CONFIRMED: 'Confirmada',
   CANCELLED: 'Cancelada',
+  COMPLETED: 'Completada',
+  NO_SHOW: 'No Asistió',
 };
 
 export default function AdminBookingsPage() {
@@ -96,14 +100,16 @@ export default function AdminBookingsPage() {
                           {booking.child.firstName} {booking.child.lastName}
                         </p>
                       )}
-                      {booking.timeSlot && (
+                      {booking.slot && (
                         <p className="text-sm text-muted-foreground">
-                          {booking.timeSlot.name} ({booking.timeSlot.startTime} - {booking.timeSlot.endTime})
+                          {booking.slot.name} ({booking.slot.startTime} - {booking.slot.endTime})
                         </p>
                       )}
-                      <p className="text-sm text-muted-foreground">
-                        Días: {booking.selectedDays.map((d) => DAYS_TEXT[d]).join(', ')}
-                      </p>
+                      {booking.slot?.daysOfWeek && (
+                        <p className="text-sm text-muted-foreground">
+                          Días: {booking.slot.daysOfWeek.map((d) => DAYS_TEXT[d]).join(', ')}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-col sm:items-end gap-2">
@@ -112,11 +118,11 @@ export default function AdminBookingsPage() {
                         {STATUS_TEXT[booking.status]}
                       </Badge>
                       <span className="font-medium text-primary">
-                        {formatCurrency(booking.monthlyPrice)}/mes
+                        {formatCurrency(Number(booking.totalPrice))}
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Desde: {formatDate(booking.startDate)}
+                      Fecha: {formatDate(booking.date)}
                     </p>
                   </div>
                 </div>

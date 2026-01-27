@@ -1,5 +1,6 @@
 export type UserRole = 'ADMIN' | 'GUARDIAN' | 'STAFF';
-export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED';
+export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'NO_SHOW';
+export type PassType = 'DAILY' | 'WEEKLY' | 'MONTHLY';
 export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
 export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';
 export type WorkshopDay = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY';
@@ -53,23 +54,31 @@ export interface TimeSlot {
   startTime: string;
   endTime: string;
   maxCapacity: number;
+  isActive: boolean;
   daysOfWeek: number[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Booking {
   id: string;
-  childId: string;
-  child?: Child;
-  timeSlotId: string;
-  timeSlot?: TimeSlot;
-  startDate: string;
-  endDate?: string;
-  selectedDays: number[];
-  weeklyFrequency: number;
-  monthlyPrice: number;
+  date: string;
+  passType: PassType;
   status: BookingStatus;
+  weeklyFrequency?: number;
+  unitPrice: string;
+  totalPrice: string;
+  discountApplied?: string;
+  notes?: string;
   createdAt: string;
   updatedAt: string;
+  confirmedAt?: string;
+  cancelledAt?: string;
+  childId: string;
+  child?: Child;
+  slotId: string;
+  slot?: TimeSlot;
+  payment?: Payment;
 }
 
 export interface Payment {

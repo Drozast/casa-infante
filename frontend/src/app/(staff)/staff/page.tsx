@@ -37,23 +37,23 @@ export default function StaffAttendancePage() {
 
   const filteredBookings = bookings?.data?.filter((booking) => {
     if (booking.status !== 'CONFIRMED') return false;
-    if (selectedSlot && booking.timeSlotId !== selectedSlot) return false;
-    if (!booking.selectedDays.includes(dayOfWeek)) return false;
+    if (selectedSlot && booking.slotId !== selectedSlot) return false;
+    if (!booking.slot?.daysOfWeek?.includes(dayOfWeek)) return false;
     return true;
   }) || [];
 
-  const getAttendanceRecord = (childId: string, timeSlotId: string) => {
+  const getAttendanceRecord = (childId: string, slotId: string) => {
     return attendance?.find(
-      (a) => a.childId === childId && a.timeSlotId === timeSlotId
+      (a) => a.childId === childId && a.timeSlotId === slotId
     );
   };
 
   const handleStatusChange = async (
     childId: string,
-    timeSlotId: string,
+    slotId: string,
     status: AttendanceStatus
   ) => {
-    const existing = getAttendanceRecord(childId, timeSlotId);
+    const existing = getAttendanceRecord(childId, slotId);
 
     try {
       if (existing) {
@@ -65,7 +65,7 @@ export default function StaffAttendancePage() {
         await recordAttendance.mutateAsync({
           childId,
           date: selectedDate,
-          timeSlotId,
+          timeSlotId: slotId,
           status,
         });
       }
@@ -75,7 +75,7 @@ export default function StaffAttendancePage() {
   };
 
   const presentCount = filteredBookings.filter((b) => {
-    const record = getAttendanceRecord(b.childId, b.timeSlotId);
+    const record = getAttendanceRecord(b.childId, b.slotId);
     return record?.status === 'PRESENT';
   }).length;
 
@@ -176,7 +176,7 @@ export default function StaffAttendancePage() {
           ) : (
             <div className="space-y-3">
               {filteredBookings.map((booking) => {
-                const record = getAttendanceRecord(booking.childId, booking.timeSlotId);
+                const record = getAttendanceRecord(booking.childId, booking.slotId);
                 const currentStatus = record?.status;
 
                 return (
@@ -196,7 +196,7 @@ export default function StaffAttendancePage() {
                           {booking.child?.firstName} {booking.child?.lastName}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          {booking.timeSlot?.name} · {booking.child?.school || 'Sin colegio'}
+                          {booking.slot?.name} · {booking.child?.school || 'Sin colegio'}
                         </p>
                       </div>
                     </div>
@@ -211,7 +211,7 @@ export default function StaffAttendancePage() {
                               currentStatus === status ? 'ring-2 ring-offset-2 ring-gray-400' : ''
                             }`}
                             onClick={() =>
-                              handleStatusChange(booking.childId, booking.timeSlotId, status)
+                              handleStatusChange(booking.childId, booking.slotId, status)
                             }
                           >
                             {STATUS_TEXT[status]}

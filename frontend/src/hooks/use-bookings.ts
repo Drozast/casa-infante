@@ -51,9 +51,11 @@ export function usePricingConfigs() {
 
 interface CreateBookingData {
   childId: string;
-  timeSlotId: string;
-  startDate: string;
-  selectedDays: number[];
+  slotId: string;
+  date: string;
+  passType?: string;
+  weeklyFrequency?: number;
+  notes?: string;
 }
 
 export function useCreateBooking() {
@@ -85,8 +87,8 @@ export function useCancelBooking() {
 }
 
 interface CalculatePriceParams {
-  timeSlotId: string;
-  selectedDays: number[];
+  slotId: string;
+  weeklyFrequency: number;
 }
 
 export function useCalculatePrice() {

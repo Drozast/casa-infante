@@ -93,7 +93,7 @@ export default function PaymentsPage() {
                     {payment.booking?.child?.firstName} {payment.booking?.child?.lastName}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {MONTHS[payment.periodMonth - 1]} {payment.periodYear} - {payment.booking?.timeSlot?.name}
+                    {MONTHS[payment.periodMonth - 1]} {payment.periodYear} - {payment.booking?.slot?.name}
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
@@ -173,7 +173,7 @@ export default function PaymentsPage() {
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {MONTHS[payment.periodMonth - 1]} {payment.periodYear} - {payment.booking?.timeSlot?.name}
+                      {MONTHS[payment.periodMonth - 1]} {payment.periodYear} - {payment.booking?.slot?.name}
                     </p>
                   </div>
                   <div className="text-right">

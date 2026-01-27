@@ -36,8 +36,8 @@ export default function NewBookingPage() {
 
   const [formData, setFormData] = useState({
     childId: '',
-    timeSlotId: '',
-    startDate: '',
+    slotId: '',
+    date: '',
     selectedDays: [] as number[],
   });
 
@@ -48,14 +48,14 @@ export default function NewBookingPage() {
 
   const [error, setError] = useState('');
 
-  const selectedTimeSlot = timeSlots?.find((ts) => ts.id === formData.timeSlotId);
+  const selectedTimeSlot = timeSlots?.find((ts) => ts.id === formData.slotId);
 
   useEffect(() => {
-    if (formData.timeSlotId && formData.selectedDays.length > 0) {
+    if (formData.slotId && formData.selectedDays.length > 0) {
       calculatePrice.mutate(
         {
-          timeSlotId: formData.timeSlotId,
-          selectedDays: formData.selectedDays,
+          slotId: formData.slotId,
+          weeklyFrequency: formData.selectedDays.length,
         },
         {
           onSuccess: (data) => {
@@ -66,7 +66,7 @@ export default function NewBookingPage() {
     } else {
       setPriceInfo(null);
     }
-  }, [formData.timeSlotId, formData.selectedDays]);
+  }, [formData.slotId, formData.selectedDays]);
 
   const handleDayToggle = (day: number) => {
     setFormData((prev) => ({
@@ -81,7 +81,7 @@ export default function NewBookingPage() {
     e.preventDefault();
     setError('');
 
-    if (!formData.childId || !formData.timeSlotId || !formData.startDate || formData.selectedDays.length === 0) {
+    if (!formData.childId || !formData.slotId || !formData.date || formData.selectedDays.length === 0) {
       setError('Por favor completa todos los campos');
       return;
     }
@@ -89,9 +89,9 @@ export default function NewBookingPage() {
     try {
       await createBooking.mutateAsync({
         childId: formData.childId,
-        timeSlotId: formData.timeSlotId,
-        startDate: formData.startDate,
-        selectedDays: formData.selectedDays,
+        slotId: formData.slotId,
+        date: formData.date,
+        weeklyFrequency: formData.selectedDays.length,
       });
       router.push('/reservas');
     } catch (err) {
@@ -223,9 +223,9 @@ export default function NewBookingPage() {
                 <button
                   key={slot.id}
                   type="button"
-                  onClick={() => setFormData((prev) => ({ ...prev, timeSlotId: slot.id }))}
+                  onClick={() => setFormData((prev) => ({ ...prev, slotId: slot.id }))}
                   className={`flex items-center justify-between p-4 rounded-lg border-2 transition-colors text-left ${
-                    formData.timeSlotId === slot.id
+                    formData.slotId === slot.id
                       ? 'border-primary bg-primary/5'
                       : 'border-transparent bg-gray-50 hover:bg-gray-100'
                   }`}
@@ -293,12 +293,12 @@ export default function NewBookingPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <Label htmlFor="startDate">Fecha de inicio</Label>
+              <Label htmlFor="date">Fecha de inicio</Label>
               <input
-                id="startDate"
+                id="date"
                 type="date"
-                value={formData.startDate}
-                onChange={(e) => setFormData((prev) => ({ ...prev, startDate: e.target.value }))}
+                value={formData.date}
+                onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))}
                 min={new Date().toISOString().split('T')[0]}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               />
