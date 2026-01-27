@@ -152,71 +152,79 @@ export default function DashboardPage() {
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <AnimateOnScroll delay={0}>
-          <Card className="relative overflow-hidden border-2 border-lime-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-lime-100 rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity -translate-y-1/2 translate-x-1/2" />
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
-              <CardTitle className="text-sm font-medium text-gray-600">Niños Registrados</CardTitle>
-              <div className="p-2 rounded-xl bg-lime-100 group-hover:scale-110 transition-transform duration-300">
-                <Baby className="h-5 w-5 text-lime-600" />
-              </div>
-            </CardHeader>
-            <CardContent className="relative">
-              <div className="text-3xl font-bold text-lime-600">
-                {loadingChildren ? '...' : children.length}
-              </div>
-            </CardContent>
-          </Card>
+          <Link href="/ninos">
+            <Card className="relative overflow-hidden border-2 border-lime-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group cursor-pointer">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-lime-100 rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity -translate-y-1/2 translate-x-1/2" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
+                <CardTitle className="text-sm font-medium text-gray-600">Niños Registrados</CardTitle>
+                <div className="p-2 rounded-xl bg-lime-100 group-hover:scale-110 transition-transform duration-300">
+                  <Baby className="h-5 w-5 text-lime-600" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative">
+                <div className="text-3xl font-bold text-lime-600">
+                  {loadingChildren ? '...' : children.length}
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         </AnimateOnScroll>
 
         <AnimateOnScroll delay={50}>
-          <Card className="relative overflow-hidden border-2 border-blue-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity -translate-y-1/2 translate-x-1/2" />
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
-              <CardTitle className="text-sm font-medium text-gray-600">Reservas Activas</CardTitle>
-              <div className="p-2 rounded-xl bg-blue-100 group-hover:scale-110 transition-transform duration-300">
-                <Calendar className="h-5 w-5 text-blue-600" />
-              </div>
-            </CardHeader>
-            <CardContent className="relative">
-              <div className="text-3xl font-bold text-blue-600">
-                {loadingBookings ? '...' : activeBookings.length}
-              </div>
-            </CardContent>
-          </Card>
+          <Link href="/reservas">
+            <Card className="relative overflow-hidden border-2 border-blue-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group cursor-pointer">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity -translate-y-1/2 translate-x-1/2" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
+                <CardTitle className="text-sm font-medium text-gray-600">Reservas Activas</CardTitle>
+                <div className="p-2 rounded-xl bg-blue-100 group-hover:scale-110 transition-transform duration-300">
+                  <Calendar className="h-5 w-5 text-blue-600" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative">
+                <div className="text-3xl font-bold text-blue-600">
+                  {loadingBookings ? '...' : activeBookings.length}
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         </AnimateOnScroll>
 
         <AnimateOnScroll delay={100}>
-          <Card className="relative overflow-hidden border-2 border-orange-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100 rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity -translate-y-1/2 translate-x-1/2" />
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
-              <CardTitle className="text-sm font-medium text-gray-600">Pagos Pendientes</CardTitle>
-              <div className="p-2 rounded-xl bg-orange-100 group-hover:scale-110 transition-transform duration-300">
-                <Clock className="h-5 w-5 text-orange-600" />
-              </div>
-            </CardHeader>
-            <CardContent className="relative">
-              <div className="text-3xl font-bold text-orange-600">
-                {loadingPayments ? '...' : pendingPayments?.length || 0}
-              </div>
-            </CardContent>
-          </Card>
+          <Link href="/pagos">
+            <Card className="relative overflow-hidden border-2 border-orange-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group cursor-pointer">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100 rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity -translate-y-1/2 translate-x-1/2" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
+                <CardTitle className="text-sm font-medium text-gray-600">Pagos Pendientes</CardTitle>
+                <div className="p-2 rounded-xl bg-orange-100 group-hover:scale-110 transition-transform duration-300">
+                  <Clock className="h-5 w-5 text-orange-600" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative">
+                <div className="text-3xl font-bold text-orange-600">
+                  {loadingPayments ? '...' : pendingPayments?.length || 0}
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         </AnimateOnScroll>
 
         <AnimateOnScroll delay={150}>
-          <Card className="relative overflow-hidden border-2 border-green-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-green-100 rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity -translate-y-1/2 translate-x-1/2" />
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Pendiente</CardTitle>
-              <div className="p-2 rounded-xl bg-green-100 group-hover:scale-110 transition-transform duration-300">
-                <DollarSign className="h-5 w-5 text-green-600" />
-              </div>
-            </CardHeader>
-            <CardContent className="relative">
-              <div className="text-2xl font-bold text-green-600">
-                {loadingPayments ? '...' : formatCurrency(totalPending)}
-              </div>
-            </CardContent>
-          </Card>
+          <Link href="/pagos">
+            <Card className="relative overflow-hidden border-2 border-green-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group cursor-pointer">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-green-100 rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity -translate-y-1/2 translate-x-1/2" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
+                <CardTitle className="text-sm font-medium text-gray-600">Total Pendiente</CardTitle>
+                <div className="p-2 rounded-xl bg-green-100 group-hover:scale-110 transition-transform duration-300">
+                  <DollarSign className="h-5 w-5 text-green-600" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative">
+                <div className="text-2xl font-bold text-green-600">
+                  {loadingPayments ? '...' : formatCurrency(totalPending)}
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         </AnimateOnScroll>
       </div>
 
