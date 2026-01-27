@@ -116,7 +116,8 @@ const stats = [
     icon: Users,
     bgColor: 'bg-lime-100',
     textColor: 'text-lime-600',
-    borderColor: 'border-lime-200'
+    borderColor: 'border-lime-200',
+    href: '/admin/usuarios'
   },
   {
     key: 'totalChildren',
@@ -125,7 +126,8 @@ const stats = [
     icon: Baby,
     bgColor: 'bg-emerald-100',
     textColor: 'text-emerald-600',
-    borderColor: 'border-emerald-200'
+    borderColor: 'border-emerald-200',
+    href: '/admin/ninos'
   },
   {
     key: 'activeBookings',
@@ -134,7 +136,8 @@ const stats = [
     icon: Calendar,
     bgColor: 'bg-blue-100',
     textColor: 'text-blue-600',
-    borderColor: 'border-blue-200'
+    borderColor: 'border-blue-200',
+    href: '/admin/reservas'
   },
   {
     key: 'monthlyRevenue',
@@ -144,7 +147,8 @@ const stats = [
     bgColor: 'bg-green-100',
     textColor: 'text-green-600',
     borderColor: 'border-green-200',
-    isCurrency: true
+    isCurrency: true,
+    href: '/admin/pagos'
   },
   {
     key: 'pendingPayments',
@@ -153,7 +157,8 @@ const stats = [
     icon: Clock,
     bgColor: 'bg-orange-100',
     textColor: 'text-orange-600',
-    borderColor: 'border-orange-200'
+    borderColor: 'border-orange-200',
+    href: '/admin/pagos'
   },
   {
     key: 'todayAttendance',
@@ -162,7 +167,8 @@ const stats = [
     icon: CheckCircle,
     bgColor: 'bg-lime-100',
     textColor: 'text-lime-600',
-    borderColor: 'border-lime-200'
+    borderColor: 'border-lime-200',
+    href: '/admin/asistencia'
   }
 ];
 
@@ -237,36 +243,37 @@ export default function AdminDashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {stats.map((stat, index) => (
           <AnimateOnScroll key={stat.key} delay={index * 50}>
-            <Card className={`relative overflow-hidden border-2 ${stat.borderColor} hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group`}>
-              <div className={`absolute top-0 right-0 w-32 h-32 ${stat.bgColor} rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity -translate-y-1/2 translate-x-1/2`} />
+            <Link href={stat.href}>
+              <Card className={`relative overflow-hidden border-2 ${stat.borderColor} hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group cursor-pointer`}>
+                <div className={`absolute top-0 right-0 w-32 h-32 ${stat.bgColor} rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity -translate-y-1/2 translate-x-1/2`} />
 
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
-                <CardTitle className="text-sm font-medium text-gray-600">
-                  {stat.title}
-                </CardTitle>
-                <div className={`p-2 rounded-xl ${stat.bgColor} group-hover:scale-110 transition-transform duration-300`}>
-                  <stat.icon className={`h-5 w-5 ${stat.textColor}`} />
-                </div>
-              </CardHeader>
-              <CardContent className="relative">
-                <div className={`text-3xl font-bold ${stat.textColor}`}>
-                  {stat.isCurrency ? (
-                    isLoading ? '...' : formatCurrency(getStatValue(stat.key))
-                  ) : (
-                    <AnimatedCounter value={getStatValue(stat.key)} isLoading={isLoading} />
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stat.description}
-                </p>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
+                  <CardTitle className="text-sm font-medium text-gray-600">
+                    {stat.title}
+                  </CardTitle>
+                  <div className={`p-2 rounded-xl ${stat.bgColor} group-hover:scale-110 transition-transform duration-300`}>
+                    <stat.icon className={`h-5 w-5 ${stat.textColor}`} />
+                  </div>
+                </CardHeader>
+                <CardContent className="relative">
+                  <div className={`text-3xl font-bold ${stat.textColor}`}>
+                    {stat.isCurrency ? (
+                      isLoading ? '...' : formatCurrency(getStatValue(stat.key))
+                    ) : (
+                      <AnimatedCounter value={getStatValue(stat.key)} isLoading={isLoading} />
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {stat.description}
+                  </p>
 
-                {/* Indicador de tendencia */}
-                <div className="flex items-center gap-1 mt-2">
-                  <TrendingUp className="h-3 w-3 text-lime-500" />
-                  <span className="text-xs text-lime-600 font-medium">Actualizado</span>
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="flex items-center gap-1 mt-2">
+                    <TrendingUp className="h-3 w-3 text-lime-500" />
+                    <span className="text-xs text-lime-600 font-medium">Actualizado</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           </AnimateOnScroll>
         ))}
       </div>
