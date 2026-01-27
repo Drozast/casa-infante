@@ -27,22 +27,39 @@ async function fetchApi<T>(
     ...options.headers,
   };
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...fetchOptions,
-    headers,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}${endpoint}`, {
+      ...fetchOptions,
+      headers,
+    });
+  } catch {
+    throw new ApiError('Error de conexion. Verifica tu internet.', 0);
+  }
 
-  const data = await response.json();
+  let data: unknown;
+  try {
+    data = await response.json();
+  } catch {
+    if (!response.ok) {
+      throw new ApiError(
+        `Error del servidor (${response.status})`,
+        response.status
+      );
+    }
+    throw new ApiError('Respuesta invalida del servidor', response.status);
+  }
 
   if (!response.ok) {
+    const errorData = data as { message?: string };
     throw new ApiError(
-      data.message || 'Error en la solicitud',
+      errorData.message || 'Error en la solicitud',
       response.status,
       data
     );
   }
 
-  return data;
+  return data as T;
 }
 
 export const api = {

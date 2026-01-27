@@ -108,5 +108,8 @@ export function useAuth() {
     logout,
     isLoggingIn: loginMutation.isPending,
     isRegistering: registerMutation.isPending,
+    loginError: loginMutation.error?.message || null,
+    registerError: registerMutation.error?.message || null,
+    resetLoginError: loginMutation.reset,
   };
 }

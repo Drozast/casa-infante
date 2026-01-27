@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
-import { Eye, EyeOff, Loader2, ArrowLeft, TreePine, Users, Home as HomeIcon } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ArrowLeft, TreePine, Users, Home as HomeIcon, AlertCircle } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('Correo electronico invalido'),
@@ -22,7 +22,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const { login, isLoggingIn } = useAuth();
+  const { login, isLoggingIn, loginError, resetLoginError } = useAuth();
 
   const {
     register,
@@ -33,7 +33,12 @@ export default function LoginPage() {
   });
 
   const onSubmit = (data: LoginForm) => {
+    if (loginError) resetLoginError();
     login(data);
+  };
+
+  const handleInputChange = () => {
+    if (loginError) resetLoginError();
   };
 
   return (
@@ -137,7 +142,7 @@ export default function LoginPage() {
                     type="email"
                     placeholder="correo@ejemplo.cl"
                     className="h-12 border-gray-200 focus:border-lime-500 focus:ring-lime-500"
-                    {...register('email')}
+                    {...register('email', { onChange: handleInputChange })}
                   />
                   {errors.email && (
                     <p className="text-sm text-red-500">{errors.email.message}</p>
@@ -151,7 +156,7 @@ export default function LoginPage() {
                       type={showPassword ? 'text' : 'password'}
                       placeholder="********"
                       className="h-12 border-gray-200 focus:border-lime-500 focus:ring-lime-500 pr-12"
-                      {...register('password')}
+                      {...register('password', { onChange: handleInputChange })}
                     />
                     <button
                       type="button"
@@ -172,6 +177,12 @@ export default function LoginPage() {
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col gap-4 pt-2">
+                {loginError && (
+                  <div className="w-full flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                    <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                    <span>{loginError}</span>
+                  </div>
+                )}
                 <Button
                   type="submit"
                   className="w-full h-12 bg-lime-600 hover:bg-lime-700 text-white font-medium"
