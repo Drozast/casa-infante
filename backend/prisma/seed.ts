@@ -269,6 +269,273 @@ a través del aprendizaje lúdico y la expresión artística.`,
 
   console.log('✅ System settings created');
 
+  // ═══════════════════════════════════════════════════════════════════
+  // DEMO USERS (GUARDIANS) WITH CHILDREN
+  // ═══════════════════════════════════════════════════════════════════
+  const demoPassword = await bcrypt.hash('demo123', 10);
+
+  // Demo User 1: María González
+  const demoUser1 = await prisma.user.upsert({
+    where: { email: 'maria.gonzalez@demo.cl' },
+    update: {},
+    create: {
+      email: 'maria.gonzalez@demo.cl',
+      password: demoPassword,
+      firstName: 'María',
+      lastName: 'González Pérez',
+      phone: '+56912345678',
+      rut: '12.345.678-9',
+      role: UserRole.GUARDIAN,
+      emailVerified: true,
+    },
+  });
+
+  console.log('✅ Demo user 1 created:', demoUser1.email);
+
+  // Children for Demo User 1
+  const child1 = await prisma.child.upsert({
+    where: { id: 'demo-child-1' },
+    update: {},
+    create: {
+      id: 'demo-child-1',
+      firstName: 'Sofía',
+      lastName: 'Martínez González',
+      birthDate: new Date('2019-03-15'),
+      gender: 'F',
+      schoolName: 'Colegio DSV Valdivia',
+      schoolGrade: '1° Básico',
+      allergies: ['Nueces'],
+      medicalConditions: [],
+      medications: [],
+      bloodType: 'A+',
+      emergencyContactName: 'Carlos Martínez',
+      emergencyContactPhone: '+56987654321',
+      emergencyContactRelation: 'Padre',
+      guardianId: demoUser1.id,
+    },
+  });
+
+  const child2 = await prisma.child.upsert({
+    where: { id: 'demo-child-2' },
+    update: {},
+    create: {
+      id: 'demo-child-2',
+      firstName: 'Mateo',
+      lastName: 'Martínez González',
+      birthDate: new Date('2021-07-22'),
+      gender: 'M',
+      schoolName: 'Colegio DSV Valdivia',
+      schoolGrade: 'Pre-Kinder',
+      allergies: [],
+      medicalConditions: [],
+      medications: [],
+      bloodType: 'O+',
+      emergencyContactName: 'Carlos Martínez',
+      emergencyContactPhone: '+56987654321',
+      emergencyContactRelation: 'Padre',
+      guardianId: demoUser1.id,
+    },
+  });
+
+  console.log('✅ Children for demo user 1 created');
+
+  // Demo User 2: Pedro Soto
+  const demoUser2 = await prisma.user.upsert({
+    where: { email: 'pedro.soto@demo.cl' },
+    update: {},
+    create: {
+      email: 'pedro.soto@demo.cl',
+      password: demoPassword,
+      firstName: 'Pedro',
+      lastName: 'Soto Muñoz',
+      phone: '+56998765432',
+      rut: '15.678.901-2',
+      role: UserRole.GUARDIAN,
+      emailVerified: true,
+    },
+  });
+
+  console.log('✅ Demo user 2 created:', demoUser2.email);
+
+  // Children for Demo User 2
+  const child3 = await prisma.child.upsert({
+    where: { id: 'demo-child-3' },
+    update: {},
+    create: {
+      id: 'demo-child-3',
+      firstName: 'Valentina',
+      lastName: 'Soto Ramírez',
+      birthDate: new Date('2018-11-08'),
+      gender: 'F',
+      schoolName: 'Colegio DSV Valdivia',
+      schoolGrade: '2° Básico',
+      allergies: ['Lactosa'],
+      medicalConditions: [],
+      medications: [],
+      bloodType: 'B+',
+      emergencyContactName: 'Ana Ramírez',
+      emergencyContactPhone: '+56911223344',
+      emergencyContactRelation: 'Madre',
+      guardianId: demoUser2.id,
+    },
+  });
+
+  console.log('✅ Children for demo user 2 created');
+
+  // ═══════════════════════════════════════════════════════════════════
+  // BOOKINGS FOR DEMO USERS
+  // ═══════════════════════════════════════════════════════════════════
+  const today = new Date();
+  const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+
+  // Booking for Child 1 (Sofía) - Plan 2 días
+  const booking1 = await prisma.booking.upsert({
+    where: { id: 'demo-booking-1' },
+    update: {},
+    create: {
+      id: 'demo-booking-1',
+      date: nextMonth,
+      passType: 'WEEKLY',
+      status: 'CONFIRMED',
+      weeklyFrequency: 2,
+      unitPrice: 20000,
+      totalPrice: 160000,
+      childId: child1.id,
+      slotId: 'tarde',
+      confirmedAt: new Date(),
+    },
+  });
+
+  // Payment for Booking 1
+  await prisma.payment.upsert({
+    where: { bookingId: booking1.id },
+    update: {},
+    create: {
+      amount: 160000,
+      status: 'COMPLETED',
+      method: 'TRANSFER',
+      finalAmount: 152000,
+      discountPercent: 5,
+      discountAmount: 8000,
+      guardianId: demoUser1.id,
+      bookingId: booking1.id,
+      paidAt: new Date(),
+    },
+  });
+
+  // Booking for Child 2 (Mateo) - Plan 3 días
+  const booking2 = await prisma.booking.upsert({
+    where: { id: 'demo-booking-2' },
+    update: {},
+    create: {
+      id: 'demo-booking-2',
+      date: nextMonth,
+      passType: 'WEEKLY',
+      status: 'CONFIRMED',
+      weeklyFrequency: 3,
+      unitPrice: 18500,
+      totalPrice: 222000,
+      childId: child2.id,
+      slotId: 'tarde',
+      confirmedAt: new Date(),
+    },
+  });
+
+  // Payment for Booking 2 (pending)
+  await prisma.payment.upsert({
+    where: { bookingId: booking2.id },
+    update: {},
+    create: {
+      amount: 222000,
+      status: 'PENDING',
+      method: 'TRANSBANK',
+      finalAmount: 222000,
+      guardianId: demoUser1.id,
+      bookingId: booking2.id,
+      dueDate: new Date(nextMonth.getFullYear(), nextMonth.getMonth(), 5),
+    },
+  });
+
+  // Booking for Child 3 (Valentina) - Plan 2 días
+  const booking3 = await prisma.booking.upsert({
+    where: { id: 'demo-booking-3' },
+    update: {},
+    create: {
+      id: 'demo-booking-3',
+      date: nextMonth,
+      passType: 'WEEKLY',
+      status: 'CONFIRMED',
+      weeklyFrequency: 2,
+      unitPrice: 20000,
+      totalPrice: 160000,
+      childId: child3.id,
+      slotId: 'dia-completo',
+      confirmedAt: new Date(),
+    },
+  });
+
+  // Payment for Booking 3 (pending)
+  await prisma.payment.upsert({
+    where: { bookingId: booking3.id },
+    update: {},
+    create: {
+      amount: 160000,
+      status: 'PENDING',
+      method: 'TRANSBANK',
+      finalAmount: 160000,
+      guardianId: demoUser2.id,
+      bookingId: booking3.id,
+      dueDate: new Date(nextMonth.getFullYear(), nextMonth.getMonth(), 5),
+    },
+  });
+
+  console.log('✅ Demo bookings and payments created');
+
+  // ═══════════════════════════════════════════════════════════════════
+  // WORKSHOP ENROLLMENTS FOR DEMO CHILDREN
+  // ═══════════════════════════════════════════════════════════════════
+  const alemanyTuesday = await prisma.workshop.findFirst({
+    where: { name: 'Alemán', dayOfWeek: WorkshopDay.TUESDAY },
+  });
+
+  const musicaWednesday = await prisma.workshop.findFirst({
+    where: { name: 'Música', dayOfWeek: WorkshopDay.WEDNESDAY },
+  });
+
+  if (alemanyTuesday) {
+    await prisma.workshopEnrollment.upsert({
+      where: {
+        childId_workshopId: {
+          childId: child1.id,
+          workshopId: alemanyTuesday.id,
+        },
+      },
+      update: {},
+      create: {
+        childId: child1.id,
+        workshopId: alemanyTuesday.id,
+      },
+    });
+  }
+
+  if (musicaWednesday) {
+    await prisma.workshopEnrollment.upsert({
+      where: {
+        childId_workshopId: {
+          childId: child3.id,
+          workshopId: musicaWednesday.id,
+        },
+      },
+      update: {},
+      create: {
+        childId: child3.id,
+        workshopId: musicaWednesday.id,
+      },
+    });
+  }
+
+  console.log('✅ Workshop enrollments created');
+
   console.log('🎉 Database seeded successfully!');
 }
 
