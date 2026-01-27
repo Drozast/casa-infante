@@ -18,13 +18,14 @@ export class BookingsService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(
-    page = 1,
-    limit = 10,
+    page?: number,
+    limit?: number,
     status?: BookingStatus,
     from?: string,
     to?: string,
   ) {
-    const { skip } = getPaginationParams({ page, limit });
+    const pagination = getPaginationParams({ page, limit });
+    const skip = pagination.skip;
 
     const where = {
       ...(status && { status }),
@@ -69,16 +70,16 @@ export class BookingsService {
         },
         orderBy: { date: 'desc' },
         skip,
-        take: limit,
+        take: pagination.limit,
       }),
       this.prisma.booking.count({ where }),
     ]);
 
-    return createPaginatedResult(bookings, total, page, limit);
+    return createPaginatedResult(bookings, total, pagination.page, pagination.limit);
   }
 
-  async findByGuardian(guardianId: string, page = 1, limit = 10) {
-    const { skip } = getPaginationParams({ page, limit });
+  async findByGuardian(guardianId: string, page?: number, limit?: number) {
+    const pagination = getPaginationParams({ page, limit });
 
     const [bookings, total] = await Promise.all([
       this.prisma.booking.findMany({
@@ -104,15 +105,15 @@ export class BookingsService {
           },
         },
         orderBy: { date: 'desc' },
-        skip,
-        take: limit,
+        skip: pagination.skip,
+        take: pagination.limit,
       }),
       this.prisma.booking.count({
         where: { child: { guardianId } },
       }),
     ]);
 
-    return createPaginatedResult(bookings, total, page, limit);
+    return createPaginatedResult(bookings, total, pagination.page, pagination.limit);
   }
 
   async getUpcoming(guardianId: string) {

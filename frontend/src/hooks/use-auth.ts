@@ -19,19 +19,16 @@ interface RegisterData extends LoginCredentials {
 }
 
 interface AuthResponse {
-  success: boolean;
-  data: {
-    user: {
-      id: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-      role: 'ADMIN' | 'GUARDIAN' | 'STAFF';
-      profileImage?: string;
-    };
-    accessToken: string;
-    refreshToken: string;
+  user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: 'ADMIN' | 'GUARDIAN' | 'STAFF';
+    profileImage?: string;
   };
+  accessToken: string;
+  refreshToken: string;
 }
 
 export function useAuth() {
@@ -43,7 +40,7 @@ export function useAuth() {
     mutationFn: (credentials: LoginCredentials) =>
       api.post<AuthResponse>('/auth/login', credentials),
     onSuccess: (response) => {
-      const { user, accessToken, refreshToken } = response.data;
+      const { user, accessToken, refreshToken } = response;
       setAuth(user, accessToken, refreshToken);
 
       toast({
@@ -72,7 +69,7 @@ export function useAuth() {
     mutationFn: (data: RegisterData) =>
       api.post<AuthResponse>('/auth/register', data),
     onSuccess: (response) => {
-      const { user, accessToken, refreshToken } = response.data;
+      const { user, accessToken, refreshToken } = response;
       setAuth(user, accessToken, refreshToken);
 
       toast({

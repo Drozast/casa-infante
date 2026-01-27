@@ -59,6 +59,15 @@ async function fetchApi<T>(
     );
   }
 
+  // Unwrap { success, data, meta } envelope from backend
+  const wrapped = data as { success?: boolean; data?: unknown; meta?: unknown };
+  if (wrapped && typeof wrapped === 'object' && 'success' in wrapped && 'data' in wrapped) {
+    if ('meta' in wrapped) {
+      return { data: wrapped.data, meta: wrapped.meta } as T;
+    }
+    return wrapped.data as T;
+  }
+
   return data as T;
 }
 
