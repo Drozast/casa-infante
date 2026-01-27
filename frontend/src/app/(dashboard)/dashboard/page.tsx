@@ -357,23 +357,25 @@ export default function DashboardPage() {
                           </p>
                         </div>
                         <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200">
-                          {booking.timeSlot?.name}
+                          {booking.slot?.name}
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm text-muted-foreground">Días:</span>
-                        {booking.selectedDays.map((day) => (
-                          <Badge key={day} variant="outline" className="text-xs border-lime-300 text-lime-700">
-                            {DAY_NAMES[day]}
-                          </Badge>
-                        ))}
-                      </div>
+                      {booking.slot?.daysOfWeek && (
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm text-muted-foreground">Días:</span>
+                          {booking.slot.daysOfWeek.map((day: number) => (
+                            <Badge key={day} variant="outline" className="text-xs border-lime-300 text-lime-700">
+                              {DAY_NAMES[day]}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                       <div className="flex items-center justify-between text-sm pt-2 border-t">
                         <span className="text-muted-foreground">
-                          Desde: {formatDate(booking.startDate)}
+                          Desde: {formatDate(booking.date)}
                         </span>
                         <span className="font-semibold text-lime-600">
-                          {formatCurrency(booking.monthlyPrice)}/mes
+                          {formatCurrency(Number(booking.totalPrice))}
                         </span>
                       </div>
                     </div>
