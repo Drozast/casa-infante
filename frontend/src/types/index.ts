@@ -1,7 +1,7 @@
 export type UserRole = 'ADMIN' | 'GUARDIAN' | 'STAFF';
 export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'NO_SHOW';
 export type PassType = 'DAILY' | 'WEEKLY' | 'MONTHLY';
-export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
+export type PaymentStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
 export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';
 export type WorkshopDay = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY';
 
@@ -95,14 +95,19 @@ export interface Booking {
 
 export interface Payment {
   id: string;
+  amount: string | number;
+  status: PaymentStatus;
+  method: string;
+  finalAmount: string | number;
+  discountPercent?: string | number | null;
+  discountAmount?: string | number | null;
+  paidAt?: string | null;
+  dueDate?: string | null;
   bookingId: string;
   booking?: Booking;
-  amount: number;
-  status: PaymentStatus;
-  transactionId?: string;
-  paidAt?: string;
-  periodMonth: number;
-  periodYear: number;
+  guardianId: string;
+  guardian?: User;
+  invoice?: Invoice | null;
   createdAt: string;
   updatedAt: string;
 }

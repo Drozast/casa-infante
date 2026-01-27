@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useAdminStats, useAdminPayments, useAdminBookings, useAdminChildren } from '@/hooks/use-admin';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,14 +30,15 @@ export default function AdminReportsPage() {
   const currentYear = new Date().getFullYear();
 
   // Calcular estadísticas
-  const monthlyPayments = payments.filter(
-    (p) => p.periodMonth === currentMonth + 1 && p.periodYear === currentYear
-  );
-  const paidThisMonth = monthlyPayments.filter((p) => p.status === 'PAID');
+  const monthlyPayments = payments.filter((p) => {
+    const d = new Date(p.createdAt);
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
+  const paidThisMonth = monthlyPayments.filter((p) => p.status === 'COMPLETED');
   const pendingThisMonth = monthlyPayments.filter((p) => p.status === 'PENDING');
 
-  const totalPaidThisMonth = paidThisMonth.reduce((sum, p) => sum + p.amount, 0);
-  const totalPendingThisMonth = pendingThisMonth.reduce((sum, p) => sum + p.amount, 0);
+  const totalPaidThisMonth = paidThisMonth.reduce((sum, p) => sum + Number(p.amount), 0);
+  const totalPendingThisMonth = pendingThisMonth.reduce((sum, p) => sum + Number(p.amount), 0);
 
   const activeBookings = bookings.filter((b) => b.status === 'CONFIRMED');
 

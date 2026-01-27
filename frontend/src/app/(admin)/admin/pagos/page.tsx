@@ -20,21 +20,18 @@ function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
-const MONTHS = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-];
-
 const STATUS_COLORS: Record<PaymentStatus, string> = {
   PENDING: 'bg-yellow-100 text-yellow-800',
-  PAID: 'bg-green-100 text-green-800',
+  PROCESSING: 'bg-blue-100 text-blue-800',
+  COMPLETED: 'bg-green-100 text-green-800',
   FAILED: 'bg-red-100 text-red-800',
   REFUNDED: 'bg-gray-100 text-gray-800',
 };
 
 const STATUS_TEXT: Record<PaymentStatus, string> = {
   PENDING: 'Pendiente',
-  PAID: 'Pagado',
+  PROCESSING: 'Procesando',
+  COMPLETED: 'Pagado',
   FAILED: 'Fallido',
   REFUNDED: 'Reembolsado',
 };
@@ -45,12 +42,12 @@ export default function AdminPaymentsPage() {
   const payments = paymentsData?.data || [];
 
   const totalPaid = payments
-    .filter((p) => p.status === 'PAID')
-    .reduce((sum, p) => sum + p.amount, 0);
+    .filter((p) => p.status === 'COMPLETED')
+    .reduce((sum, p) => sum + Number(p.amount), 0);
 
   const totalPending = payments
     .filter((p) => p.status === 'PENDING')
-    .reduce((sum, p) => sum + p.amount, 0);
+    .reduce((sum, p) => sum + Number(p.amount), 0);
 
   return (
     <div className="space-y-6">
@@ -108,12 +105,9 @@ export default function AdminPaymentsPage() {
                   className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg border"
                 >
                   <div>
-                    <p className="font-medium">
-                      Período: {MONTHS[payment.periodMonth - 1]} {payment.periodYear}
-                    </p>
                     {payment.booking?.child && (
-                      <p className="text-sm text-muted-foreground">
-                        Niño: {payment.booking.child.firstName} {payment.booking.child.lastName}
+                      <p className="font-medium">
+                        {payment.booking.child.firstName} {payment.booking.child.lastName}
                       </p>
                     )}
                     <p className="text-sm text-muted-foreground">
@@ -122,7 +116,7 @@ export default function AdminPaymentsPage() {
                   </div>
                   <div className="flex flex-col sm:items-end gap-2">
                     <span className="text-lg font-bold">
-                      {formatCurrency(payment.amount)}
+                      {formatCurrency(Number(payment.amount))}
                     </span>
                     <Badge className={STATUS_COLORS[payment.status]}>
                       {STATUS_TEXT[payment.status]}
@@ -130,11 +124,6 @@ export default function AdminPaymentsPage() {
                     {payment.paidAt && (
                       <p className="text-xs text-muted-foreground">
                         Pagado: {formatDate(payment.paidAt)}
-                      </p>
-                    )}
-                    {payment.transactionId && (
-                      <p className="text-xs text-muted-foreground font-mono">
-                        TX: {payment.transactionId.substring(0, 12)}...
                       </p>
                     )}
                   </div>

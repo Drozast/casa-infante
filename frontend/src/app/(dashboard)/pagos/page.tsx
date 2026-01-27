@@ -22,21 +22,18 @@ function formatDate(date: string): string {
   }).format(new Date(date));
 }
 
-const MONTHS = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-];
-
 const STATUS_COLORS: Record<PaymentStatus, string> = {
   PENDING: 'bg-yellow-100 text-yellow-800',
-  PAID: 'bg-green-100 text-green-800',
+  PROCESSING: 'bg-blue-100 text-blue-800',
+  COMPLETED: 'bg-green-100 text-green-800',
   FAILED: 'bg-red-100 text-red-800',
   REFUNDED: 'bg-gray-100 text-gray-800',
 };
 
 const STATUS_TEXT: Record<PaymentStatus, string> = {
   PENDING: 'Pendiente',
-  PAID: 'Pagado',
+  PROCESSING: 'Procesando',
+  COMPLETED: 'Pagado',
   FAILED: 'Fallido',
   REFUNDED: 'Reembolsado',
 };
@@ -49,7 +46,7 @@ export default function PaymentsPage() {
   const payments = paymentsData?.data || [];
   const pendingPayments = payments.filter((p) => p.status === 'PENDING');
   const completedPayments = payments.filter((p) => p.status !== 'PENDING');
-  const totalPending = pendingPayments.reduce((sum, p) => sum + p.amount, 0);
+  const totalPending = pendingPayments.reduce((sum, p) => sum + Number(p.amount), 0);
 
   const handlePay = async (bookingId: string) => {
     setPayingId(bookingId);
@@ -93,11 +90,11 @@ export default function PaymentsPage() {
                     {payment.booking?.child?.firstName} {payment.booking?.child?.lastName}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {MONTHS[payment.periodMonth - 1]} {payment.periodYear} - {payment.booking?.slot?.name}
+                    {payment.booking?.slot?.name} - Creado: {formatDate(payment.createdAt)}
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <p className="text-lg font-bold">{formatCurrency(payment.amount)}</p>
+                  <p className="text-lg font-bold">{formatCurrency(Number(payment.amount))}</p>
                   <Button
                     onClick={() => handlePay(payment.bookingId)}
                     disabled={payingId === payment.bookingId}
@@ -173,11 +170,11 @@ export default function PaymentsPage() {
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {MONTHS[payment.periodMonth - 1]} {payment.periodYear} - {payment.booking?.slot?.name}
+                      {payment.booking?.slot?.name} - {formatDate(payment.createdAt)}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold">{formatCurrency(payment.amount)}</p>
+                    <p className="font-bold">{formatCurrency(Number(payment.amount))}</p>
                     {payment.paidAt && (
                       <p className="text-sm text-muted-foreground">
                         Pagado: {formatDate(payment.paidAt)}
