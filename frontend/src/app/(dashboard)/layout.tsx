@@ -12,9 +12,11 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, isHydrated } = useAuthStore();
 
   useEffect(() => {
+    if (!isHydrated) return;
+
     if (!isAuthenticated) {
       router.push('/login');
     } else if (user?.role === 'ADMIN') {
@@ -22,9 +24,9 @@ export default function DashboardLayout({
     } else if (user?.role === 'STAFF') {
       router.push('/staff');
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, router, isHydrated]);
 
-  if (!isAuthenticated || user?.role !== 'GUARDIAN') {
+  if (!isHydrated || !isAuthenticated || user?.role !== 'GUARDIAN') {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="animate-pulse text-xl">Cargando...</div>

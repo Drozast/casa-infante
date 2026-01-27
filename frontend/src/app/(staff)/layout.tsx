@@ -12,17 +12,19 @@ export default function StaffLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, isHydrated } = useAuthStore();
 
   useEffect(() => {
+    if (!isHydrated) return;
+
     if (!isAuthenticated) {
       router.push('/login');
     } else if (user?.role !== 'STAFF' && user?.role !== 'ADMIN') {
       router.push('/dashboard');
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, router, isHydrated]);
 
-  if (!isAuthenticated || (user?.role !== 'STAFF' && user?.role !== 'ADMIN')) {
+  if (!isHydrated || !isAuthenticated || (user?.role !== 'STAFF' && user?.role !== 'ADMIN')) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="animate-pulse text-xl">Cargando...</div>
