@@ -3,6 +3,7 @@ import { Inter, Poppins } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
 import { Toaster } from '@/components/ui/toaster';
+import { InstallPrompt } from '@/components/pwa/install-prompt';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const poppins = Poppins({
@@ -155,6 +156,7 @@ export default function RootLayout({
         <Providers>
           {children}
           <Toaster />
+          <InstallPrompt />
         </Providers>
         <script
           dangerouslySetInnerHTML={{

@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { Sidebar } from '@/components/layout/sidebar';
+import { MobileNav } from '@/components/layout/mobile-nav';
 
 export default function StaffLayout({
   children,
@@ -33,10 +34,11 @@ export default function StaffLayout({
     <div className="min-h-screen bg-gray-50">
       <Sidebar />
       <main className="lg:pl-64">
-        <div className="container mx-auto p-4 pt-20 lg:p-8 lg:pt-8">
+        <div className="container mx-auto p-4 pt-20 pb-24 lg:p-8 lg:pt-8 lg:pb-8">
           {children}
         </div>
       </main>
+      <MobileNav />
     </div>
   );
 }
