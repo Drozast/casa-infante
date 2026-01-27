@@ -76,9 +76,9 @@ export default function AdminChildrenPage() {
                       <p className="text-sm text-muted-foreground">
                         {calculateAge(child.birthDate)} años
                       </p>
-                      {child.school && (
+                      {child.schoolName && (
                         <p className="text-sm text-muted-foreground">
-                          {child.school} {child.grade && `- ${child.grade}`}
+                          {child.schoolName} {child.schoolGrade && `- ${child.schoolGrade}`}
                         </p>
                       )}
                     </div>
@@ -96,9 +96,6 @@ export default function AdminChildrenPage() {
                       <Badge variant="outline">
                         Registrado: {formatDate(child.createdAt)}
                       </Badge>
-                      {child.rut && (
-                        <Badge variant="secondary">{child.rut}</Badge>
-                      )}
                     </div>
                   </div>
                 </div>

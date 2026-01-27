@@ -18,17 +18,12 @@ export default function NewChildPage() {
     firstName: '',
     lastName: '',
     birthDate: '',
-    rut: '',
-    school: '',
-    grade: '',
+    schoolName: '',
+    schoolGrade: '',
     allergies: '',
-    medicalConditions: '',
-    medications: '',
-    dietaryRestrictions: '',
-    emergencyContact: '',
-    emergencyPhone: '',
-    authorizedPickup: '',
-    notes: '',
+    emergencyContactName: '',
+    emergencyContactPhone: '',
+    emergencyContactRelation: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -50,19 +45,12 @@ export default function NewChildPage() {
         firstName: formData.firstName,
         lastName: formData.lastName,
         birthDate: formData.birthDate,
-        rut: formData.rut || undefined,
-        school: formData.school || undefined,
-        grade: formData.grade || undefined,
-        preferences: {
-          allergies: formData.allergies || undefined,
-          medicalConditions: formData.medicalConditions || undefined,
-          medications: formData.medications || undefined,
-          dietaryRestrictions: formData.dietaryRestrictions || undefined,
-          emergencyContact: formData.emergencyContact || undefined,
-          emergencyPhone: formData.emergencyPhone || undefined,
-          authorizedPickup: formData.authorizedPickup || undefined,
-          notes: formData.notes || undefined,
-        },
+        schoolName: formData.schoolName || undefined,
+        schoolGrade: formData.schoolGrade || undefined,
+        allergies: formData.allergies ? formData.allergies.split(',').map((a) => a.trim()) : undefined,
+        emergencyContactName: formData.emergencyContactName || 'No especificado',
+        emergencyContactPhone: formData.emergencyContactPhone || 'No especificado',
+        emergencyContactRelation: formData.emergencyContactRelation || 'No especificado',
       });
       router.push('/ninos');
     } catch (err) {
@@ -128,46 +116,34 @@ export default function NewChildPage() {
                 />
               </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="birthDate">Fecha de Nacimiento *</Label>
-                <Input
-                  id="birthDate"
-                  name="birthDate"
-                  type="date"
-                  value={formData.birthDate}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="rut">RUT</Label>
-                <Input
-                  id="rut"
-                  name="rut"
-                  value={formData.rut}
-                  onChange={handleChange}
-                  placeholder="12.345.678-9"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="birthDate">Fecha de Nacimiento *</Label>
+              <Input
+                id="birthDate"
+                name="birthDate"
+                type="date"
+                value={formData.birthDate}
+                onChange={handleChange}
+                required
+              />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="school">Colegio</Label>
+                <Label htmlFor="schoolName">Colegio</Label>
                 <Input
-                  id="school"
-                  name="school"
-                  value={formData.school}
+                  id="schoolName"
+                  name="schoolName"
+                  value={formData.schoolName}
                   onChange={handleChange}
                   placeholder="Nombre del colegio"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="grade">Curso</Label>
+                <Label htmlFor="schoolGrade">Curso</Label>
                 <Input
-                  id="grade"
-                  name="grade"
-                  value={formData.grade}
+                  id="schoolGrade"
+                  name="schoolGrade"
+                  value={formData.schoolGrade}
                   onChange={handleChange}
                   placeholder="Ej: 3° Básico"
                 />
@@ -189,37 +165,7 @@ export default function NewChildPage() {
                 name="allergies"
                 value={formData.allergies}
                 onChange={handleChange}
-                placeholder="Lista de alergias conocidas"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="medicalConditions">Condiciones Médicas</Label>
-              <Input
-                id="medicalConditions"
-                name="medicalConditions"
-                value={formData.medicalConditions}
-                onChange={handleChange}
-                placeholder="Condiciones médicas a considerar"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="medications">Medicamentos</Label>
-              <Input
-                id="medications"
-                name="medications"
-                value={formData.medications}
-                onChange={handleChange}
-                placeholder="Medicamentos que toma actualmente"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="dietaryRestrictions">Restricciones Alimentarias</Label>
-              <Input
-                id="dietaryRestrictions"
-                name="dietaryRestrictions"
-                value={formData.dietaryRestrictions}
-                onChange={handleChange}
-                placeholder="Restricciones de alimentación"
+                placeholder="Separar con comas: Nueces, Maní, etc."
               />
             </div>
           </CardContent>
@@ -227,52 +173,44 @@ export default function NewChildPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Contacto de Emergencia</CardTitle>
-            <CardDescription>Personas autorizadas para emergencias</CardDescription>
+            <CardTitle>Contacto de Emergencia *</CardTitle>
+            <CardDescription>Persona autorizada para emergencias</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="emergencyContactName">Nombre del Contacto *</Label>
+              <Input
+                id="emergencyContactName"
+                name="emergencyContactName"
+                value={formData.emergencyContactName}
+                onChange={handleChange}
+                placeholder="Nombre completo"
+                required
+              />
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="emergencyContact">Nombre de Contacto</Label>
+                <Label htmlFor="emergencyContactPhone">Teléfono *</Label>
                 <Input
-                  id="emergencyContact"
-                  name="emergencyContact"
-                  value={formData.emergencyContact}
+                  id="emergencyContactPhone"
+                  name="emergencyContactPhone"
+                  value={formData.emergencyContactPhone}
                   onChange={handleChange}
-                  placeholder="Nombre del contacto"
+                  placeholder="+56 9 1234 5678"
+                  required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="emergencyPhone">Teléfono de Emergencia</Label>
+                <Label htmlFor="emergencyContactRelation">Relación *</Label>
                 <Input
-                  id="emergencyPhone"
-                  name="emergencyPhone"
-                  value={formData.emergencyPhone}
+                  id="emergencyContactRelation"
+                  name="emergencyContactRelation"
+                  value={formData.emergencyContactRelation}
                   onChange={handleChange}
-                  placeholder="+56 9 1234 5678"
+                  placeholder="Ej: Padre, Madre, Tío"
+                  required
                 />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="authorizedPickup">Personas Autorizadas para Retirar</Label>
-              <Input
-                id="authorizedPickup"
-                name="authorizedPickup"
-                value={formData.authorizedPickup}
-                onChange={handleChange}
-                placeholder="Nombres de personas autorizadas"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="notes">Notas Adicionales</Label>
-              <textarea
-                id="notes"
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                placeholder="Cualquier información adicional..."
-                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              />
             </div>
           </CardContent>
         </Card>

@@ -203,7 +203,7 @@ export default function NewBookingPage() {
                       {child.firstName} {child.lastName}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {child.school || 'Sin colegio'}
+                      {child.schoolName || 'Sin colegio'}
                     </p>
                   </div>
                 </button>

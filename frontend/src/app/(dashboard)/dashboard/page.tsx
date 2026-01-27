@@ -282,7 +282,7 @@ export default function DashboardPage() {
                             {child.firstName} {child.lastName}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {child.school || 'Sin escuela registrada'}
+                            {child.schoolName || 'Sin escuela registrada'}
                           </p>
                         </div>
                       </div>

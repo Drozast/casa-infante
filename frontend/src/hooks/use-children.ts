@@ -11,9 +11,14 @@ export function useChildren() {
 
   return useQuery({
     queryKey: ['children', isGuardian ? 'my-children' : 'all'],
-    queryFn: () => {
+    queryFn: async () => {
       const endpoint = isGuardian ? '/children/my-children' : '/children';
-      return api.get<PaginatedResponse<Child>>(endpoint, accessToken ?? undefined);
+      const result = await api.get<PaginatedResponse<Child> | Child[]>(endpoint, accessToken ?? undefined);
+      // Guardian endpoint returns plain array; admin returns paginated
+      if (Array.isArray(result)) {
+        return { data: result, total: result.length, page: 1, limit: result.length, totalPages: 1 } as PaginatedResponse<Child>;
+      }
+      return result as PaginatedResponse<Child>;
     },
     enabled: !!accessToken,
   });
@@ -33,19 +38,19 @@ interface CreateChildData {
   firstName: string;
   lastName: string;
   birthDate: string;
-  rut?: string;
-  school?: string;
-  grade?: string;
-  preferences?: {
-    allergies?: string;
-    medicalConditions?: string;
-    medications?: string;
-    dietaryRestrictions?: string;
-    emergencyContact?: string;
-    emergencyPhone?: string;
-    authorizedPickup?: string;
-    notes?: string;
-  };
+  gender?: string;
+  schoolName?: string;
+  schoolGrade?: string;
+  allergies?: string[];
+  medicalConditions?: string[];
+  medications?: string[];
+  bloodType?: string;
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+  emergencyContactRelation: string;
+  familyNotes?: string;
+  hasSiblings?: boolean;
+  siblingsInfo?: string;
 }
 
 export function useCreateChild() {

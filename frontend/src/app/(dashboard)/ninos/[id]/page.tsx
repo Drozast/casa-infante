@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useChild, useUpdateChild } from '@/hooks/use-children';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,6 @@ function formatDate(date: string): string {
 
 export default function ChildDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const childId = params.id as string;
   const { data: child, isLoading } = useChild(childId);
   const updateChild = useUpdateChild();
@@ -42,17 +41,12 @@ export default function ChildDetailPage() {
     firstName: '',
     lastName: '',
     birthDate: '',
-    rut: '',
-    school: '',
-    grade: '',
+    schoolName: '',
+    schoolGrade: '',
     allergies: '',
-    medicalConditions: '',
-    medications: '',
-    dietaryRestrictions: '',
-    emergencyContact: '',
-    emergencyPhone: '',
-    authorizedPickup: '',
-    notes: '',
+    emergencyContactName: '',
+    emergencyContactPhone: '',
+    emergencyContactRelation: '',
   });
 
   const startEditing = () => {
@@ -61,17 +55,12 @@ export default function ChildDetailPage() {
         firstName: child.firstName,
         lastName: child.lastName,
         birthDate: child.birthDate.split('T')[0],
-        rut: child.rut || '',
-        school: child.school || '',
-        grade: child.grade || '',
-        allergies: child.preferences?.allergies || '',
-        medicalConditions: child.preferences?.medicalConditions || '',
-        medications: child.preferences?.medications || '',
-        dietaryRestrictions: child.preferences?.dietaryRestrictions || '',
-        emergencyContact: child.preferences?.emergencyContact || '',
-        emergencyPhone: child.preferences?.emergencyPhone || '',
-        authorizedPickup: child.preferences?.authorizedPickup || '',
-        notes: child.preferences?.notes || '',
+        schoolName: child.schoolName || '',
+        schoolGrade: child.schoolGrade || '',
+        allergies: child.allergies?.join(', ') || '',
+        emergencyContactName: child.emergencyContactName || '',
+        emergencyContactPhone: child.emergencyContactPhone || '',
+        emergencyContactRelation: child.emergencyContactRelation || '',
       });
       setIsEditing(true);
     }
@@ -93,19 +82,12 @@ export default function ChildDetailPage() {
           firstName: formData.firstName,
           lastName: formData.lastName,
           birthDate: formData.birthDate,
-          rut: formData.rut || undefined,
-          school: formData.school || undefined,
-          grade: formData.grade || undefined,
-          preferences: {
-            allergies: formData.allergies || undefined,
-            medicalConditions: formData.medicalConditions || undefined,
-            medications: formData.medications || undefined,
-            dietaryRestrictions: formData.dietaryRestrictions || undefined,
-            emergencyContact: formData.emergencyContact || undefined,
-            emergencyPhone: formData.emergencyPhone || undefined,
-            authorizedPickup: formData.authorizedPickup || undefined,
-            notes: formData.notes || undefined,
-          },
+          schoolName: formData.schoolName || undefined,
+          schoolGrade: formData.schoolGrade || undefined,
+          allergies: formData.allergies ? formData.allergies.split(',').map((a) => a.trim()) : undefined,
+          emergencyContactName: formData.emergencyContactName || undefined,
+          emergencyContactPhone: formData.emergencyContactPhone || undefined,
+          emergencyContactRelation: formData.emergencyContactRelation || undefined,
         },
       });
       setIsEditing(false);
@@ -204,44 +186,33 @@ export default function ChildDetailPage() {
                   />
                 </div>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="birthDate">Fecha de Nacimiento</Label>
-                  <Input
-                    id="birthDate"
-                    name="birthDate"
-                    type="date"
-                    value={formData.birthDate}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="rut">RUT</Label>
-                  <Input
-                    id="rut"
-                    name="rut"
-                    value={formData.rut}
-                    onChange={handleChange}
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="birthDate">Fecha de Nacimiento</Label>
+                <Input
+                  id="birthDate"
+                  name="birthDate"
+                  type="date"
+                  value={formData.birthDate}
+                  onChange={handleChange}
+                  required
+                />
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="school">Colegio</Label>
+                  <Label htmlFor="schoolName">Colegio</Label>
                   <Input
-                    id="school"
-                    name="school"
-                    value={formData.school}
+                    id="schoolName"
+                    name="schoolName"
+                    value={formData.schoolName}
                     onChange={handleChange}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="grade">Curso</Label>
+                  <Label htmlFor="schoolGrade">Curso</Label>
                   <Input
-                    id="grade"
-                    name="grade"
-                    value={formData.grade}
+                    id="schoolGrade"
+                    name="schoolGrade"
+                    value={formData.schoolGrade}
                     onChange={handleChange}
                   />
                 </div>
@@ -261,33 +232,7 @@ export default function ChildDetailPage() {
                   name="allergies"
                   value={formData.allergies}
                   onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="medicalConditions">Condiciones Médicas</Label>
-                <Input
-                  id="medicalConditions"
-                  name="medicalConditions"
-                  value={formData.medicalConditions}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="medications">Medicamentos</Label>
-                <Input
-                  id="medications"
-                  name="medications"
-                  value={formData.medications}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="dietaryRestrictions">Restricciones Alimentarias</Label>
-                <Input
-                  id="dietaryRestrictions"
-                  name="dietaryRestrictions"
-                  value={formData.dietaryRestrictions}
-                  onChange={handleChange}
+                  placeholder="Separar con comas: Nueces, Maní, etc."
                 />
               </div>
             </CardContent>
@@ -298,44 +243,37 @@ export default function ChildDetailPage() {
               <CardTitle>Contacto de Emergencia</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="emergencyContactName">Nombre del Contacto</Label>
+                <Input
+                  id="emergencyContactName"
+                  name="emergencyContactName"
+                  value={formData.emergencyContactName}
+                  onChange={handleChange}
+                  placeholder="Nombre completo"
+                />
+              </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="emergencyContact">Nombre de Contacto</Label>
+                  <Label htmlFor="emergencyContactPhone">Teléfono</Label>
                   <Input
-                    id="emergencyContact"
-                    name="emergencyContact"
-                    value={formData.emergencyContact}
+                    id="emergencyContactPhone"
+                    name="emergencyContactPhone"
+                    value={formData.emergencyContactPhone}
                     onChange={handleChange}
+                    placeholder="+56 9 1234 5678"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="emergencyPhone">Teléfono</Label>
+                  <Label htmlFor="emergencyContactRelation">Relación</Label>
                   <Input
-                    id="emergencyPhone"
-                    name="emergencyPhone"
-                    value={formData.emergencyPhone}
+                    id="emergencyContactRelation"
+                    name="emergencyContactRelation"
+                    value={formData.emergencyContactRelation}
                     onChange={handleChange}
+                    placeholder="Ej: Padre, Madre, Tío"
                   />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="authorizedPickup">Personas Autorizadas</Label>
-                <Input
-                  id="authorizedPickup"
-                  name="authorizedPickup"
-                  value={formData.authorizedPickup}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="notes">Notas</Label>
-                <textarea
-                  id="notes"
-                  name="notes"
-                  value={formData.notes}
-                  onChange={handleChange}
-                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                />
               </div>
             </CardContent>
           </Card>
@@ -415,118 +353,83 @@ export default function ChildDetailPage() {
               <p className="text-sm text-muted-foreground">Fecha de Nacimiento</p>
               <p className="font-medium">{formatDate(child.birthDate)}</p>
             </div>
-            {child.rut && (
-              <div>
-                <p className="text-sm text-muted-foreground">RUT</p>
-                <p className="font-medium">{child.rut}</p>
-              </div>
-            )}
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            {child.school && (
+            {child.schoolName && (
               <div>
                 <p className="text-sm text-muted-foreground">Colegio</p>
-                <p className="font-medium">{child.school}</p>
+                <p className="font-medium">{child.schoolName}</p>
               </div>
             )}
-            {child.grade && (
+            {child.schoolGrade && (
               <div>
                 <p className="text-sm text-muted-foreground">Curso</p>
-                <Badge variant="outline">{child.grade}</Badge>
+                <Badge variant="outline">{child.schoolGrade}</Badge>
               </div>
             )}
           </div>
         </CardContent>
       </Card>
 
-      {child.preferences && (
-        <>
-          <Card>
-            <CardHeader>
-              <CardTitle>Información de Salud</CardTitle>
-              <CardDescription>Datos médicos importantes</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {child.preferences.allergies && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Alergias</p>
-                  <Badge variant="destructive" className="mt-1">
-                    {child.preferences.allergies}
+      <Card>
+        <CardHeader>
+          <CardTitle>Información de Salud</CardTitle>
+          <CardDescription>Datos médicos importantes</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {child.allergies?.length > 0 ? (
+            <div>
+              <p className="text-sm text-muted-foreground">Alergias</p>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {child.allergies.map((allergy, i) => (
+                  <Badge key={i} variant="destructive">
+                    {allergy}
                   </Badge>
-                </div>
-              )}
-              {child.preferences.medicalConditions && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Condiciones Médicas</p>
-                  <p className="font-medium">{child.preferences.medicalConditions}</p>
-                </div>
-              )}
-              {child.preferences.medications && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Medicamentos</p>
-                  <p className="font-medium">{child.preferences.medications}</p>
-                </div>
-              )}
-              {child.preferences.dietaryRestrictions && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Restricciones Alimentarias</p>
-                  <p className="font-medium">{child.preferences.dietaryRestrictions}</p>
-                </div>
-              )}
-              {!child.preferences.allergies &&
-                !child.preferences.medicalConditions &&
-                !child.preferences.medications &&
-                !child.preferences.dietaryRestrictions && (
-                  <p className="text-muted-foreground">
-                    No hay información de salud registrada
-                  </p>
-                )}
-            </CardContent>
-          </Card>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="text-muted-foreground">
+              No hay información de salud registrada
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Contacto de Emergencia</CardTitle>
-              <CardDescription>Personas autorizadas</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Contacto de Emergencia</CardTitle>
+          <CardDescription>Persona autorizada para emergencias</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {child.emergencyContactName ? (
+            <>
               <div className="grid gap-4 sm:grid-cols-2">
-                {child.preferences.emergencyContact && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Contacto</p>
-                    <p className="font-medium">{child.preferences.emergencyContact}</p>
-                  </div>
-                )}
-                {child.preferences.emergencyPhone && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Contacto</p>
+                  <p className="font-medium">{child.emergencyContactName}</p>
+                </div>
+                {child.emergencyContactPhone && (
                   <div>
                     <p className="text-sm text-muted-foreground">Teléfono</p>
-                    <p className="font-medium">{child.preferences.emergencyPhone}</p>
+                    <p className="font-medium">{child.emergencyContactPhone}</p>
                   </div>
                 )}
               </div>
-              {child.preferences.authorizedPickup && (
+              {child.emergencyContactRelation && (
                 <div>
-                  <p className="text-sm text-muted-foreground">Personas Autorizadas para Retirar</p>
-                  <p className="font-medium">{child.preferences.authorizedPickup}</p>
+                  <p className="text-sm text-muted-foreground">Relación</p>
+                  <p className="font-medium">{child.emergencyContactRelation}</p>
                 </div>
               )}
-              {child.preferences.notes && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Notas</p>
-                  <p className="font-medium">{child.preferences.notes}</p>
-                </div>
-              )}
-              {!child.preferences.emergencyContact &&
-                !child.preferences.emergencyPhone &&
-                !child.preferences.authorizedPickup && (
-                  <p className="text-muted-foreground">
-                    No hay contactos de emergencia registrados
-                  </p>
-                )}
-            </CardContent>
-          </Card>
-        </>
-      )}
+            </>
+          ) : (
+            <p className="text-muted-foreground">
+              No hay contactos de emergencia registrados
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

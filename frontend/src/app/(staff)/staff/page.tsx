@@ -196,7 +196,7 @@ export default function StaffAttendancePage() {
                           {booking.child?.firstName} {booking.child?.lastName}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          {booking.slot?.name} · {booking.child?.school || 'Sin colegio'}
+                          {booking.slot?.name} · {booking.child?.schoolName || 'Sin colegio'}
                         </p>
                       </div>
                     </div>

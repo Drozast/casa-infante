@@ -24,10 +24,21 @@ export interface Child {
   firstName: string;
   lastName: string;
   birthDate: string;
-  rut?: string;
-  school?: string;
-  grade?: string;
-  photoUrl?: string;
+  gender?: string;
+  profileImage?: string;
+  schoolName?: string;
+  schoolGrade?: string;
+  allergies: string[];
+  medicalConditions: string[];
+  medications: string[];
+  bloodType?: string;
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+  emergencyContactRelation: string;
+  familyNotes?: string;
+  hasSiblings: boolean;
+  siblingsInfo?: string;
+  isActive: boolean;
   guardianId: string;
   guardian?: User;
   preferences?: ChildPreferences;
@@ -37,15 +48,16 @@ export interface Child {
 
 export interface ChildPreferences {
   id: string;
-  allergies?: string;
-  medicalConditions?: string;
-  medications?: string;
-  dietaryRestrictions?: string;
-  emergencyContact?: string;
-  emergencyPhone?: string;
-  authorizedPickup?: string;
-  notes?: string;
+  physicalActivity: boolean;
+  musicReinforcement: boolean;
+  socialDevelopment: boolean;
+  germanLanguage: boolean;
+  englishLanguage: boolean;
+  customPlan?: string;
+  additionalNotes?: string;
   childId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface TimeSlot {
