@@ -24,31 +24,35 @@ export function InstallPrompt() {
     // Don't show if already installed
     if (isInStandaloneMode) return;
 
-    // Check if dismissed recently
-    const dismissed = localStorage.getItem('pwa-install-dismissed');
-    if (dismissed) {
-      const dismissedDate = new Date(dismissed);
-      const now = new Date();
-      const daysDiff = (now.getTime() - dismissedDate.getTime()) / (1000 * 60 * 60 * 24);
-      if (daysDiff < 7) return; // Don't show for 7 days after dismissal
-    }
-
-    // For iOS, show custom prompt
-    if (isIOSDevice && !isInStandaloneMode) {
-      setTimeout(() => setShowPrompt(true), 3000);
-      return;
-    }
-
     // For other browsers, listen for beforeinstallprompt
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setTimeout(() => setShowPrompt(true), 3000);
+    };
+
+    // Listen for manual trigger from download button
+    const manualTrigger = () => {
+      setShowPrompt(true);
     };
 
     window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
+    window.addEventListener('show-install-prompt', manualTrigger);
+
+    // Check if dismissed recently - only for auto-show
+    const dismissed = localStorage.getItem('pwa-install-dismissed');
+    const shouldAutoShow = !dismissed ||
+      (new Date().getTime() - new Date(dismissed).getTime()) / (1000 * 60 * 60 * 24) >= 7;
+
+    // For iOS or when we have deferred prompt, auto-show after delay
+    if (shouldAutoShow && (isIOSDevice || deferredPrompt)) {
+      setTimeout(() => setShowPrompt(true), 3000);
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('show-install-prompt', manualTrigger);
+    };
+  }, [deferredPrompt]);
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;

@@ -23,7 +23,8 @@ import {
   MessageCircle,
   LayoutDashboard,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  Download
 } from 'lucide-react';
 
 const features = [
@@ -288,7 +289,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-to-br from-lime-50 via-white to-emerald-50 relative overflow-hidden">
+      <section className="pt-24 pb-16 md:pt-32 md:pb-24 bg-lime-50 relative overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-10 w-72 h-72 bg-lime-200/30 rounded-full blur-3xl animate-pulse" />
@@ -364,7 +365,7 @@ export default function LandingPage() {
 
             <AnimateOnScroll animation="scale" delay={200}>
               <div className="relative">
-                <div className="aspect-square rounded-3xl bg-gradient-to-br from-lime-300 via-lime-200 to-emerald-200 overflow-hidden shadow-2xl transform hover:scale-[1.02] transition-transform duration-500">
+                <div className="aspect-square rounded-3xl bg-lime-200 overflow-hidden shadow-2xl transform hover:scale-[1.02] transition-transform duration-500">
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center p-8">
                       <div className="w-36 h-36 mx-auto mb-6 rounded-full bg-white/90 flex items-center justify-center shadow-xl transform hover:rotate-3 transition-transform duration-300">
@@ -434,7 +435,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
               <AnimateOnScroll key={index} animation="fadeUp" delay={index * 100}>
-                <Card className="border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-gradient-to-br from-white to-lime-50 group hover:-translate-y-2">
+                <Card className="border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-white group hover:-translate-y-2">
                   <CardHeader>
                     <div className="w-14 h-14 rounded-2xl bg-lime-100 flex items-center justify-center mb-4 group-hover:bg-lime-500 group-hover:scale-110 transition-all duration-300">
                       <feature.icon className="h-7 w-7 text-lime-600 group-hover:text-white transition-colors duration-300" />
@@ -589,7 +590,7 @@ export default function LandingPage() {
       </section>
 
       {/* About Section */}
-      <section id="nosotros" className="py-16 md:py-24 bg-gradient-to-br from-lime-50 to-emerald-50 relative overflow-hidden">
+      <section id="nosotros" className="py-16 md:py-24 bg-lime-50 relative overflow-hidden">
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-lime-200/50 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -656,7 +657,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-r from-lime-600 to-emerald-600 relative overflow-hidden">
+      <section className="py-16 md:py-24 bg-lime-600 relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
@@ -808,6 +809,31 @@ export default function LandingPage() {
                   </Link>
                 </li>
               </ul>
+              {/* Download App Button */}
+              <div className="mt-6 pt-4 border-t border-gray-700">
+                <button
+                  onClick={() => {
+                    const event = new Event('show-install-prompt');
+                    window.dispatchEvent(event);
+                  }}
+                  className="flex items-center gap-3 bg-white rounded-xl p-3 hover:bg-lime-50 transition-all duration-300 hover:scale-105 group w-full"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center shadow-sm">
+                    <Image
+                      src="/logo.png"
+                      alt="Casa Infante"
+                      width={32}
+                      height={32}
+                      className="rounded"
+                    />
+                  </div>
+                  <div className="text-left flex-1">
+                    <p className="text-sm font-semibold text-gray-900">Descargar App</p>
+                    <p className="text-xs text-gray-500">Instalar en tu celular</p>
+                  </div>
+                  <Download className="h-5 w-5 text-lime-600 group-hover:translate-y-0.5 transition-transform duration-300" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
