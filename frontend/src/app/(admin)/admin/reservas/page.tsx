@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import { useAdminBookings } from '@/hooks/use-admin';
+import { useQueryClient } from '@tanstack/react-query';
 import { BookingCalendar } from '@/components/calendar/booking-calendar';
+import { AddBookingModal } from '@/components/calendar/add-booking-modal';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -49,8 +51,11 @@ const STATUS_TEXT: Record<string, string> = {
 };
 
 export default function AdminBookingsPage() {
+  const queryClient = useQueryClient();
   const { data: bookingsData, isLoading } = useAdminBookings();
   const [view, setView] = useState<'calendar' | 'list'>('calendar');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const bookings = bookingsData?.data || [];
 
@@ -64,8 +69,17 @@ export default function AdminBookingsPage() {
   });
 
   const handleAddBooking = (date: Date) => {
-    // TODO: Abrir modal para agregar reserva
-    console.log('Agregar reserva para:', date);
+    setSelectedDate(date);
+    setModalOpen(true);
+  };
+
+  const handleNewBookingClick = () => {
+    setSelectedDate(new Date());
+    setModalOpen(true);
+  };
+
+  const handleBookingSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ['admin', 'bookings'] });
   };
 
   return (
@@ -77,7 +91,10 @@ export default function AdminBookingsPage() {
             Administra todas las reservas de la plataforma
           </p>
         </div>
-        <Button className="gap-2 bg-lime-600 hover:bg-lime-700">
+        <Button
+          className="gap-2 bg-lime-600 hover:bg-lime-700"
+          onClick={handleNewBookingClick}
+        >
           <Plus className="h-4 w-4" />
           Nueva Reserva
         </Button>
@@ -229,6 +246,14 @@ export default function AdminBookingsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Modal para agregar reserva */}
+      <AddBookingModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        selectedDate={selectedDate}
+        onSuccess={handleBookingSuccess}
+      />
     </div>
   );
 }

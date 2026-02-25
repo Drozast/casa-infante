@@ -161,3 +161,45 @@ export function useUpdateAttendance() {
     },
   });
 }
+
+interface TimeSlot {
+  id: string;
+  name: string;
+  startTime: string;
+  endTime: string;
+  maxCapacity: number;
+  isActive: boolean;
+  daysOfWeek: number[];
+}
+
+export function useTimeSlots() {
+  const { accessToken } = useAuthStore();
+
+  return useQuery({
+    queryKey: ['timeSlots'],
+    queryFn: () => api.get<TimeSlot[]>('/bookings/slots', accessToken ?? undefined),
+    enabled: !!accessToken,
+  });
+}
+
+interface CreateBookingData {
+  childId: string;
+  slotId: string;
+  date: string;
+  passType?: 'DAILY' | 'WEEKLY' | 'MONTHLY';
+  weeklyFrequency?: number;
+  notes?: string;
+}
+
+export function useCreateBooking() {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuthStore();
+
+  return useMutation({
+    mutationFn: (data: CreateBookingData) =>
+      api.post<Booking>('/bookings', data, accessToken ?? undefined),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'bookings'] });
+    },
+  });
+}
