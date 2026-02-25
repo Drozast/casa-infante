@@ -32,6 +32,7 @@ const guardianNavItems: NavItem[] = [
   { href: '/ninos', label: 'Mis niños', icon: Users },
   { href: '/reservas', label: 'Reservas', icon: Calendar },
   { href: '/pagos', label: 'Pagos', icon: CreditCard },
+  { href: '/familias', label: 'Familias', icon: Users },
   { href: '/perfil', label: 'Mi perfil', icon: UserCircle },
 ];
 
@@ -85,7 +86,7 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r bg-white transition-transform lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r bg-white transition-transform lg:translate-x-0',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >

@@ -70,6 +70,8 @@ model User {
   phone                String?
   rut                  String?   @unique
   role                 UserRole  @default(GUARDIAN)
+  profession           String?
+  shareProfile         Boolean   @default(false) @map("share_profile")
   isActive             Boolean   @default(true) @map("is_active")
   emailVerified        Boolean   @default(false) @map("email_verified")
   profileImage         String?   @map("profile_image")

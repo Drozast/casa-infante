@@ -6,6 +6,7 @@ import {
   MaxLength,
   IsOptional,
   IsEnum,
+  IsBoolean,
   Matches,
 } from 'class-validator';
 import { UserRole } from '@prisma/client';
@@ -49,4 +50,15 @@ export class CreateUserDto {
   @IsOptional()
   @IsEnum(UserRole)
   role?: UserRole;
+
+  @ApiPropertyOptional({ example: 'Ingeniero Civil' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  profession?: string;
+
+  @ApiPropertyOptional({ example: false })
+  @IsOptional()
+  @IsBoolean()
+  shareProfile?: boolean;
 }

@@ -57,4 +57,15 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   profileImage?: string;
+
+  @ApiPropertyOptional({ example: 'Ingeniero Civil' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  profession?: string;
+
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  shareProfile?: boolean;
 }

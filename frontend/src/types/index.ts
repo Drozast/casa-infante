@@ -14,7 +14,10 @@ export interface User {
   phone?: string;
   rut?: string;
   address?: string;
+  profession?: string;
+  shareProfile?: boolean;
   emailVerified: boolean;
+  profileImage?: string;
   createdAt: string;
   updatedAt: string;
 }

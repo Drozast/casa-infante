@@ -8,6 +8,7 @@ import {
   Body,
   Query,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
@@ -35,6 +36,12 @@ export class UsersController {
     @Query('search') search?: string,
   ) {
     return this.usersService.findAll(page, limit, role, search);
+  }
+
+  @Get('shared-guardians')
+  @ApiOperation({ summary: 'Obtener apoderados que comparten su perfil' })
+  async findSharedGuardians(@Request() req: { user: { userId: string } }) {
+    return this.usersService.findSharedGuardians(req.user.userId);
   }
 
   @Get(':id')

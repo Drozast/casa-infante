@@ -7,6 +7,9 @@ interface User {
   firstName: string;
   lastName: string;
   role: 'ADMIN' | 'GUARDIAN' | 'STAFF';
+  phone?: string;
+  profession?: string;
+  shareProfile?: boolean;
   profileImage?: string;
 }
 

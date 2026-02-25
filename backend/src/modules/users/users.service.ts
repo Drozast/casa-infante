@@ -42,6 +42,8 @@ export class UsersService {
           phone: true,
           rut: true,
           role: true,
+          profession: true,
+          shareProfile: true,
           isActive: true,
           emailVerified: true,
           profileImage: true,
@@ -72,6 +74,8 @@ export class UsersService {
         phone: true,
         rut: true,
         role: true,
+        profession: true,
+        shareProfile: true,
         isActive: true,
         emailVerified: true,
         profileImage: true,
@@ -222,5 +226,37 @@ export class UsersService {
     });
 
     return { message: 'Usuario eliminado exitosamente' };
+  }
+
+  async findSharedGuardians(excludeUserId?: string) {
+    const guardians = await this.prisma.user.findMany({
+      where: {
+        role: 'GUARDIAN',
+        shareProfile: true,
+        isActive: true,
+        ...(excludeUserId && { id: { not: excludeUserId } }),
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        profession: true,
+        profileImage: true,
+        children: {
+          where: { isActive: true },
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            schoolName: true,
+          },
+        },
+      },
+      orderBy: { lastName: 'asc' },
+    });
+
+    return guardians;
   }
 }

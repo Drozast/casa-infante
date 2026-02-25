@@ -16,7 +16,8 @@ const profileSchema = z.object({
   firstName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
   lastName: z.string().min(2, 'El apellido debe tener al menos 2 caracteres'),
   phone: z.string().optional(),
-  address: z.string().optional(),
+  profession: z.string().optional(),
+  shareProfile: z.boolean().optional(),
 });
 
 const passwordSchema = z.object({
@@ -45,8 +46,9 @@ export default function ProfilePage() {
     defaultValues: {
       firstName: user?.firstName || '',
       lastName: user?.lastName || '',
-      phone: '',
-      address: '',
+      phone: user?.phone || '',
+      profession: user?.profession || '',
+      shareProfile: user?.shareProfile || false,
     },
   });
 
@@ -164,12 +166,29 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="address">Dirección</Label>
+              <Label htmlFor="profession">Profesión / Trabajo</Label>
               <Input
-                id="address"
-                {...profileForm.register('address')}
-                placeholder="Calle 123, Comuna, Ciudad"
+                id="profession"
+                {...profileForm.register('profession')}
+                placeholder="Ej: Ingeniero Civil, Profesora, Médico"
               />
+            </div>
+
+            <div className="flex items-center space-x-3 p-4 bg-lime-50 rounded-lg border border-lime-200">
+              <input
+                type="checkbox"
+                id="shareProfile"
+                {...profileForm.register('shareProfile')}
+                className="h-4 w-4 rounded border-gray-300 text-lime-600 focus:ring-lime-500"
+              />
+              <div className="flex-1">
+                <Label htmlFor="shareProfile" className="font-medium cursor-pointer">
+                  Compartir mi información con otras familias
+                </Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Si activas esta opción, otros apoderados podrán ver tu nombre, teléfono, profesión y los nombres de tus hijos en el directorio de familias.
+                </p>
+              </div>
             </div>
 
             {profileMessage && (

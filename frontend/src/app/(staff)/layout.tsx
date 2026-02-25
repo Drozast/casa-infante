@@ -35,8 +35,8 @@ export default function StaffLayout({
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar />
-      <main className="lg:pl-64">
-        <div className="container mx-auto p-4 pt-20 pb-24 lg:p-8 lg:pt-8 lg:pb-8">
+      <main className="lg:pl-72">
+        <div className="mx-auto max-w-5xl p-4 pt-20 pb-24 lg:p-8 lg:pt-8 lg:pb-8">
           {children}
         </div>
       </main>
