@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, IsDateString, IsEnum } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsEnum, IsBoolean } from 'class-validator';
 import { BillingType } from '@prisma/client';
 
 export class CheckInDto {
@@ -26,6 +26,21 @@ export class CheckInDto {
   @IsOptional()
   @IsEnum(BillingType)
   billingType?: BillingType;
+
+  @ApiPropertyOptional({ example: true, description: '¿El niño almuerza?' })
+  @IsOptional()
+  @IsBoolean()
+  hasLunch?: boolean;
+
+  @ApiPropertyOptional({ example: true, description: '¿Hay que ir a buscar al niño?' })
+  @IsOptional()
+  @IsBoolean()
+  hasPickup?: boolean;
+
+  @ApiPropertyOptional({ example: '12:50', description: 'Hora del traslado' })
+  @IsOptional()
+  @IsString()
+  pickupTime?: string;
 
   @ApiPropertyOptional({ example: 'Llegó con su mamá' })
   @IsOptional()

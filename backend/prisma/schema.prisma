@@ -227,6 +227,9 @@ model Attendance {
   notes        String?          @db.Text
   billingType  BillingType      @default(POSTPAID) @map("billing_type")
   slotId       String?          @map("slot_id")
+  hasLunch     Boolean          @default(false) @map("has_lunch")
+  hasPickup    Boolean          @default(false) @map("has_pickup")
+  pickupTime   String?          @map("pickup_time")
   createdAt    DateTime         @default(now()) @map("created_at")
   updatedAt    DateTime         @updatedAt @map("updated_at")
 

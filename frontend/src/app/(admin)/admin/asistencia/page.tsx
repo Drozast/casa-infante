@@ -5,6 +5,7 @@ import {
   useAdminChildren,
   useCheckIn,
   useDeleteAttendance,
+  useUpdateAttendanceDetails,
   useMonthlyCalendar,
   usePendingBillings,
   useGenerateMonthlyBilling,
@@ -30,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Calendar, CheckCircle, Clock, DollarSign, Plus, Trash2, UserCheck } from 'lucide-react';
+import { Calendar, CheckCircle, Clock, DollarSign, Plus, Trash2, UserCheck, Car, UtensilsCrossed } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 const MONTHS = [
@@ -38,7 +39,14 @@ const MONTHS = [
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
 ];
 
-const DAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+const DAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie*', 'Sáb'];
+
+interface EditingAttendance {
+  id: string;
+  hasLunch: boolean;
+  hasPickup: boolean;
+  pickupTime: string;
+}
 
 export default function AdminAttendancePage() {
   const today = new Date();
@@ -47,6 +55,12 @@ export default function AdminAttendancePage() {
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState(today.toISOString().split('T')[0]);
   const [isAddingAttendance, setIsAddingAttendance] = useState(false);
+  const [editingAttendance, setEditingAttendance] = useState<EditingAttendance | null>(null);
+
+  // Form state for new attendance
+  const [newHasLunch, setNewHasLunch] = useState(false);
+  const [newHasPickup, setNewHasPickup] = useState(false);
+  const [newPickupTime, setNewPickupTime] = useState('');
 
   const { data: childrenData, isLoading: loadingChildren } = useAdminChildren();
   const children = childrenData?.data || [];
@@ -62,17 +76,56 @@ export default function AdminAttendancePage() {
 
   const checkIn = useCheckIn();
   const deleteAttendance = useDeleteAttendance();
+  const updateAttendanceDetails = useUpdateAttendanceDetails();
   const generateBilling = useGenerateMonthlyBilling();
   const markPaid = useMarkBillingPaid();
   const { toast } = useToast();
 
-  const handleCheckIn = async (childId: string, date: string, billingType: 'PREPAID' | 'POSTPAID') => {
+  const handleCheckIn = async (childId: string, date: string, billingType: 'PREPAID' | 'POSTPAID', hasLunch = false, hasPickup = false, pickupTime = '') => {
+    // Verificar que no sea viernes
+    const dateObj = new Date(date + 'T12:00:00');
+    if (dateObj.getDay() === 5) {
+      toast({ title: 'Error', description: 'Casa Infante no abre los viernes', variant: 'destructive' });
+      return;
+    }
+
     try {
-      await checkIn.mutateAsync({ childId, date, billingType });
+      await checkIn.mutateAsync({
+        childId,
+        date,
+        billingType,
+        hasLunch,
+        hasPickup,
+        pickupTime: hasPickup ? pickupTime : undefined
+      });
       toast({ title: 'Asistencia registrada', variant: 'default' });
       setIsAddingAttendance(false);
+      // Reset form
+      setNewHasLunch(false);
+      setNewHasPickup(false);
+      setNewPickupTime('');
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Error al registrar asistencia';
+      toast({ title: 'Error', description: errorMessage, variant: 'destructive' });
+    }
+  };
+
+  const handleUpdateAttendance = async () => {
+    if (!editingAttendance) return;
+
+    try {
+      await updateAttendanceDetails.mutateAsync({
+        id: editingAttendance.id,
+        data: {
+          hasLunch: editingAttendance.hasLunch,
+          hasPickup: editingAttendance.hasPickup,
+          pickupTime: editingAttendance.hasPickup ? editingAttendance.pickupTime : undefined,
+        }
+      });
+      toast({ title: 'Asistencia actualizada', variant: 'default' });
+      setEditingAttendance(null);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error al actualizar';
       toast({ title: 'Error', description: errorMessage, variant: 'destructive' });
     }
   };
@@ -291,54 +344,85 @@ export default function AdminAttendancePage() {
                         ))}
 
                       {/* Días del mes */}
-                      {calendarData?.calendar.map((day) => (
-                        <div
-                          key={day.day}
-                          className={`h-16 p-2 rounded-lg border relative ${
-                            day.attendance
-                              ? 'border-2'
-                              : 'border-gray-200 bg-gray-50'
-                          } ${
-                            day.attendance?.billingType === 'PREPAID'
-                              ? 'border-green-400 bg-green-50'
-                              : day.attendance?.billingType === 'POSTPAID'
-                              ? 'border-yellow-400 bg-yellow-50'
-                              : day.attendance?.billingType === 'BILLED'
-                              ? 'border-blue-400 bg-blue-50'
-                              : ''
-                          }`}
-                        >
-                          <div className="text-sm font-medium">{day.day}</div>
-                          {day.attendance && (
-                            <>
-                              <div
-                                className={`absolute top-1 right-1 w-2 h-2 rounded-full ${getBillingTypeColor(
-                                  day.attendance.billingType
-                                )}`}
-                              />
-                              <div className="text-xs text-gray-500 mt-1">
-                                {day.attendance.checkInTime &&
-                                  new Date(day.attendance.checkInTime).toLocaleTimeString('es-CL', {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                  })}
-                              </div>
-                              {day.attendance.billingType !== 'BILLED' && (
-                                <button
-                                  onClick={() => handleDeleteAttendance(day.attendance!.id)}
-                                  className="absolute bottom-1 right-1 text-red-400 hover:text-red-600"
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </button>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      ))}
+                      {calendarData?.calendar.map((day) => {
+                        const isFriday = day.dayOfWeek === 5;
+                        const isSunday = day.dayOfWeek === 0;
+                        const isWeekend = isFriday || isSunday;
+
+                        return (
+                          <div
+                            key={day.day}
+                            onClick={() => {
+                              if (day.attendance && !isWeekend) {
+                                setEditingAttendance({
+                                  id: day.attendance.id,
+                                  hasLunch: day.attendance.hasLunch,
+                                  hasPickup: day.attendance.hasPickup,
+                                  pickupTime: day.attendance.pickupTime || '',
+                                });
+                              }
+                            }}
+                            className={`h-20 p-2 rounded-lg border relative ${
+                              isWeekend
+                                ? 'bg-gray-100 border-gray-200 opacity-50'
+                                : day.attendance
+                                ? 'border-2 cursor-pointer hover:shadow-md transition-shadow'
+                                : 'border-gray-200 bg-gray-50'
+                            } ${
+                              !isWeekend && day.attendance?.billingType === 'PREPAID'
+                                ? 'border-green-400 bg-green-50'
+                                : !isWeekend && day.attendance?.billingType === 'POSTPAID'
+                                ? 'border-yellow-400 bg-yellow-50'
+                                : !isWeekend && day.attendance?.billingType === 'BILLED'
+                                ? 'border-blue-400 bg-blue-50'
+                                : ''
+                            }`}
+                          >
+                            <div className="text-sm font-medium flex items-center justify-between">
+                              <span>{day.day}</span>
+                              {isFriday && <span className="text-[10px] text-gray-400">Cerrado</span>}
+                            </div>
+                            {day.attendance && !isWeekend && (
+                              <>
+                                <div
+                                  className={`absolute top-1 right-1 w-2 h-2 rounded-full ${getBillingTypeColor(
+                                    day.attendance.billingType
+                                  )}`}
+                                />
+                                {/* Iconos de almuerzo y traslado */}
+                                <div className="flex gap-1 mt-1">
+                                  {day.attendance.hasLunch && (
+                                    <UtensilsCrossed className="h-3 w-3 text-orange-500" title="Almuerza" />
+                                  )}
+                                  {day.attendance.hasPickup && (
+                                    <div className="flex items-center gap-0.5" title={`Traslado ${day.attendance.pickupTime || ''}`}>
+                                      <Car className="h-3 w-3 text-purple-500" />
+                                      {day.attendance.pickupTime && (
+                                        <span className="text-[9px] text-purple-600">{day.attendance.pickupTime}</span>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                                {day.attendance.billingType !== 'BILLED' && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteAttendance(day.attendance!.id);
+                                    }}
+                                    className="absolute bottom-1 right-1 text-red-400 hover:text-red-600"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </button>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
 
                     {/* Leyenda */}
-                    <div className="flex gap-4 mt-4 text-sm">
+                    <div className="flex flex-wrap gap-4 mt-4 text-sm">
                       <div className="flex items-center gap-1">
                         <div className="w-3 h-3 rounded-full bg-green-500" />
                         <span>Pagado anticipado</span>
@@ -351,7 +435,76 @@ export default function AdminAttendancePage() {
                         <div className="w-3 h-3 rounded-full bg-blue-500" />
                         <span>Ya cobrado</span>
                       </div>
+                      <div className="flex items-center gap-1">
+                        <UtensilsCrossed className="h-3 w-3 text-orange-500" />
+                        <span>Almuerza</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Car className="h-3 w-3 text-purple-500" />
+                        <span>Traslado</span>
+                      </div>
                     </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Haz clic en un día con asistencia para editar almuerzo/traslado. Los viernes están cerrados.
+                    </p>
+
+                    {/* Dialog para editar asistencia */}
+                    <Dialog open={!!editingAttendance} onOpenChange={(open) => !open && setEditingAttendance(null)}>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Editar Asistencia</DialogTitle>
+                          <DialogDescription>
+                            Actualiza la información de almuerzo y traslado
+                          </DialogDescription>
+                        </DialogHeader>
+                        {editingAttendance && (
+                          <div className="space-y-4 py-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <UtensilsCrossed className="h-5 w-5 text-orange-500" />
+                                <label className="font-medium">¿Almuerza?</label>
+                              </div>
+                              <button
+                                onClick={() => setEditingAttendance({ ...editingAttendance, hasLunch: !editingAttendance.hasLunch })}
+                                className={`w-12 h-6 rounded-full transition-colors ${editingAttendance.hasLunch ? 'bg-orange-500' : 'bg-gray-300'}`}
+                              >
+                                <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${editingAttendance.hasLunch ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                              </button>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Car className="h-5 w-5 text-purple-500" />
+                                <label className="font-medium">¿Traslado?</label>
+                              </div>
+                              <button
+                                onClick={() => setEditingAttendance({ ...editingAttendance, hasPickup: !editingAttendance.hasPickup })}
+                                className={`w-12 h-6 rounded-full transition-colors ${editingAttendance.hasPickup ? 'bg-purple-500' : 'bg-gray-300'}`}
+                              >
+                                <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${editingAttendance.hasPickup ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                              </button>
+                            </div>
+                            {editingAttendance.hasPickup && (
+                              <div>
+                                <label className="text-sm font-medium">Hora del traslado</label>
+                                <input
+                                  type="time"
+                                  value={editingAttendance.pickupTime}
+                                  onChange={(e) => setEditingAttendance({ ...editingAttendance, pickupTime: e.target.value })}
+                                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1"
+                                />
+                              </div>
+                            )}
+                            <Button
+                              onClick={handleUpdateAttendance}
+                              disabled={updateAttendanceDetails.isPending}
+                              className="w-full"
+                            >
+                              Guardar Cambios
+                            </Button>
+                          </div>
+                        )}
+                      </DialogContent>
+                    </Dialog>
 
                     {/* Resumen y acción de cobro */}
                     {calendarData?.summary?.postpaidDays && calendarData.summary.postpaidDays > 0 && !calendarData?.summary?.monthlyBilling && (
@@ -483,44 +636,96 @@ export default function AdminAttendancePage() {
                 })}
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {children.map((child) => (
-                  <div
-                    key={child.id}
-                    className="flex items-center justify-between p-4 rounded-lg border hover:bg-gray-50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span className="font-semibold text-primary text-sm">
-                          {child.firstName[0]}{child.lastName[0]}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">{child.firstName} {child.lastName}</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-green-600 border-green-200 hover:bg-green-50"
-                        onClick={() => handleCheckIn(child.id, selectedDate, 'PREPAID')}
-                        disabled={checkIn.isPending}
-                      >
-                        Pagado
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-yellow-600 border-yellow-200 hover:bg-yellow-50"
-                        onClick={() => handleCheckIn(child.id, selectedDate, 'POSTPAID')}
-                        disabled={checkIn.isPending}
-                      >
-                        Por cobrar
-                      </Button>
-                    </div>
+              {/* Verificar si es viernes */}
+              {new Date(selectedDate + 'T12:00:00').getDay() === 5 && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 mb-4">
+                  <strong>Viernes cerrado:</strong> Casa Infante no abre los viernes. Selecciona otra fecha.
+                </div>
+              )}
+
+              {/* Opciones globales de almuerzo y traslado */}
+              <div className="flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg border mb-4">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="newHasLunch"
+                    checked={newHasLunch}
+                    onChange={(e) => setNewHasLunch(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <label htmlFor="newHasLunch" className="flex items-center gap-1 text-sm">
+                    <UtensilsCrossed className="h-4 w-4 text-orange-500" />
+                    Almuerza
+                  </label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="newHasPickup"
+                    checked={newHasPickup}
+                    onChange={(e) => setNewHasPickup(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <label htmlFor="newHasPickup" className="flex items-center gap-1 text-sm">
+                    <Car className="h-4 w-4 text-purple-500" />
+                    Traslado
+                  </label>
+                </div>
+                {newHasPickup && (
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm">Hora:</label>
+                    <input
+                      type="time"
+                      value={newPickupTime}
+                      onChange={(e) => setNewPickupTime(e.target.value)}
+                      className="h-8 rounded-md border border-input bg-background px-2 text-sm"
+                    />
                   </div>
-                ))}
+                )}
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {children.map((child) => {
+                  const isFriday = new Date(selectedDate + 'T12:00:00').getDay() === 5;
+
+                  return (
+                    <div
+                      key={child.id}
+                      className={`flex items-center justify-between p-4 rounded-lg border ${isFriday ? 'opacity-50' : 'hover:bg-gray-50'}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <span className="font-semibold text-primary text-sm">
+                            {child.firstName[0]}{child.lastName[0]}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm">{child.firstName} {child.lastName}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-green-600 border-green-200 hover:bg-green-50"
+                          onClick={() => handleCheckIn(child.id, selectedDate, 'PREPAID', newHasLunch, newHasPickup, newPickupTime)}
+                          disabled={checkIn.isPending || isFriday}
+                        >
+                          Pagado
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-yellow-600 border-yellow-200 hover:bg-yellow-50"
+                          onClick={() => handleCheckIn(child.id, selectedDate, 'POSTPAID', newHasLunch, newHasPickup, newPickupTime)}
+                          disabled={checkIn.isPending || isFriday}
+                        >
+                          Por cobrar
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>

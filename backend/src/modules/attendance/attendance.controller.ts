@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Delete,
   Param,
   Body,
@@ -13,6 +14,7 @@ import { UserRole, PaymentStatus } from '@prisma/client';
 import { AttendanceService } from './attendance.service';
 import { CheckInDto } from './dto/check-in.dto';
 import { CheckOutDto } from './dto/check-out.dto';
+import { UpdateAttendanceDto } from './dto/update-attendance.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -69,6 +71,16 @@ export class AttendanceController {
   @ApiOperation({ summary: 'Eliminar registro de asistencia' })
   async deleteAttendance(@Param('id') id: string) {
     return this.attendanceService.deleteAttendance(id);
+  }
+
+  @Patch(':id')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  @ApiOperation({ summary: 'Actualizar registro de asistencia (almuerzo, traslado)' })
+  async updateAttendance(
+    @Param('id') id: string,
+    @Body() dto: UpdateAttendanceDto,
+  ) {
+    return this.attendanceService.updateAttendance(id, dto);
   }
 
   @Get('child/:childId')

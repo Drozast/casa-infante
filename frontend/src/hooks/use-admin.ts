@@ -218,6 +218,9 @@ interface CalendarDay {
     billingType: 'PREPAID' | 'POSTPAID' | 'BILLED';
     checkInTime: string | null;
     checkOutTime: string | null;
+    hasLunch: boolean;
+    hasPickup: boolean;
+    pickupTime: string | null;
   } | null;
 }
 
@@ -349,8 +352,25 @@ export function useCheckIn() {
       date?: string;
       slotId?: string;
       billingType?: 'PREPAID' | 'POSTPAID';
+      hasLunch?: boolean;
+      hasPickup?: boolean;
+      pickupTime?: string;
       notes?: string;
     }) => api.post<Attendance>('/attendance/check-in', data, accessToken ?? undefined),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'attendance'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'calendar'] });
+    },
+  });
+}
+
+export function useUpdateAttendanceDetails() {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuthStore();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: { hasLunch?: boolean; hasPickup?: boolean; pickupTime?: string; notes?: string } }) =>
+      api.patch<Attendance>(`/attendance/${id}`, data, accessToken ?? undefined),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'attendance'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'calendar'] });

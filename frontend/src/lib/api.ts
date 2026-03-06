@@ -158,6 +158,13 @@ export const api = {
       token,
     }),
 
+  patch: <T>(endpoint: string, body: unknown, token?: string) =>
+    fetchApi<T>(endpoint, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+      token,
+    }),
+
   delete: <T>(endpoint: string, token?: string) =>
     fetchApi<T>(endpoint, { method: 'DELETE', token }),
 };

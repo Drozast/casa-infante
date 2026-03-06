@@ -18,7 +18,7 @@ export class AttendanceService {
   constructor(private prisma: PrismaService) {}
 
   async checkIn(staffId: string, dto: CheckInDto) {
-    const { childId, bookingId, notes, date, slotId, billingType } = dto;
+    const { childId, bookingId, notes, date, slotId, billingType, hasLunch, hasPickup, pickupTime } = dto;
 
     const child = await this.prisma.child.findUnique({
       where: { id: childId },
@@ -31,6 +31,11 @@ export class AttendanceService {
 
     // Usar fecha proporcionada o fecha actual
     const attendanceDate = date ? startOfDay(new Date(date)) : startOfDay(new Date());
+
+    // Verificar que no sea viernes (Casa Infante no abre los viernes)
+    if (attendanceDate.getDay() === 5) {
+      throw new BadRequestException('Casa Infante no abre los viernes');
+    }
 
     const existingAttendance = await this.prisma.attendance.findUnique({
       where: {
@@ -72,6 +77,9 @@ export class AttendanceService {
         status: AttendanceStatus.CHECKED_IN,
         checkInTime: new Date(),
         billingType: finalBillingType,
+        hasLunch: hasLunch || false,
+        hasPickup: hasPickup || false,
+        pickupTime: pickupTime || null,
         notes,
       },
       include: {
@@ -135,6 +143,34 @@ export class AttendanceService {
     });
 
     return updated;
+  }
+
+  async updateAttendance(attendanceId: string, data: { hasLunch?: boolean; hasPickup?: boolean; pickupTime?: string; notes?: string }) {
+    const attendance = await this.prisma.attendance.findUnique({
+      where: { id: attendanceId },
+    });
+
+    if (!attendance) {
+      throw new NotFoundException('Registro de asistencia no encontrado');
+    }
+
+    return this.prisma.attendance.update({
+      where: { id: attendanceId },
+      data: {
+        ...(data.hasLunch !== undefined && { hasLunch: data.hasLunch }),
+        ...(data.hasPickup !== undefined && { hasPickup: data.hasPickup }),
+        ...(data.pickupTime !== undefined && { pickupTime: data.pickupTime }),
+        ...(data.notes !== undefined && { notes: data.notes }),
+      },
+      include: {
+        child: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
   }
 
   async getTodayAttendance() {
@@ -270,6 +306,9 @@ export class AttendanceService {
               billingType: attendance.billingType,
               checkInTime: attendance.checkInTime,
               checkOutTime: attendance.checkOutTime,
+              hasLunch: attendance.hasLunch,
+              hasPickup: attendance.hasPickup,
+              pickupTime: attendance.pickupTime,
             }
           : null,
       });
