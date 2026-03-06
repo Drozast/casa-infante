@@ -354,7 +354,7 @@ export default function AdminAttendancePage() {
                     </div>
 
                     {/* Resumen y acción de cobro */}
-                    {calendarData?.summary.postpaidDays > 0 && !calendarData?.summary.monthlyBilling && (
+                    {calendarData?.summary?.postpaidDays && calendarData.summary.postpaidDays > 0 && !calendarData?.summary?.monthlyBilling && (
                       <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
                         <div className="flex items-center justify-between">
                           <div>
@@ -376,7 +376,7 @@ export default function AdminAttendancePage() {
                       </div>
                     )}
 
-                    {calendarData?.summary.monthlyBilling && (
+                    {calendarData?.summary?.monthlyBilling && (
                       <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
                         <div className="flex items-center justify-between">
                           <div>
