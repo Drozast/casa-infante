@@ -203,3 +203,198 @@ export function useCreateBooking() {
     },
   });
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// CALENDARIO MENSUAL Y COBROS
+// ═══════════════════════════════════════════════════════════════════
+
+interface CalendarDay {
+  day: number;
+  date: string;
+  dayOfWeek: number;
+  attendance: {
+    id: string;
+    status: string;
+    billingType: 'PREPAID' | 'POSTPAID' | 'BILLED';
+    checkInTime: string | null;
+    checkOutTime: string | null;
+  } | null;
+}
+
+interface MonthlyCalendarResponse {
+  child: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    guardian: {
+      id: string;
+      firstName: string;
+      lastName: string;
+    };
+  };
+  month: number;
+  year: number;
+  calendar: CalendarDay[];
+  summary: {
+    totalDays: number;
+    prepaidDays: number;
+    postpaidDays: number;
+    billedDays: number;
+    monthlyBilling: {
+      id: string;
+      status: string;
+      totalAmount: number;
+      paidAt: string | null;
+    } | null;
+  };
+}
+
+export function useMonthlyCalendar(childId: string, year: number, month: number) {
+  const { accessToken } = useAuthStore();
+
+  return useQuery({
+    queryKey: ['admin', 'calendar', childId, year, month],
+    queryFn: () =>
+      api.get<MonthlyCalendarResponse>(
+        `/attendance/calendar/${childId}/${year}/${month}`,
+        accessToken ?? undefined
+      ),
+    enabled: !!accessToken && !!childId,
+  });
+}
+
+interface MonthlyBilling {
+  id: string;
+  month: number;
+  year: number;
+  totalDays: number;
+  pricePerDay: number;
+  subtotal: number;
+  discountPercent: number | null;
+  discountAmount: number | null;
+  totalAmount: number;
+  status: string;
+  method: string | null;
+  paidAt: string | null;
+  child: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    profileImage: string | null;
+  };
+  guardian: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string | null;
+  };
+  _count: {
+    attendances: number;
+  };
+}
+
+export function useMonthlyBillings(status?: string, month?: number, year?: number) {
+  const { accessToken } = useAuthStore();
+
+  return useQuery({
+    queryKey: ['admin', 'billing', status, month, year],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (status) params.append('status', status);
+      if (month) params.append('month', month.toString());
+      if (year) params.append('year', year.toString());
+      return api.get<PaginatedResponse<MonthlyBilling>>(
+        `/attendance/billing?${params.toString()}`,
+        accessToken ?? undefined
+      );
+    },
+    enabled: !!accessToken,
+  });
+}
+
+interface PendingChild {
+  id: string;
+  firstName: string;
+  lastName: string;
+  guardian: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  pendingDays: number;
+}
+
+export function usePendingBillings(year: number, month: number) {
+  const { accessToken } = useAuthStore();
+
+  return useQuery({
+    queryKey: ['admin', 'billing', 'pending', year, month],
+    queryFn: () =>
+      api.get<PendingChild[]>(
+        `/attendance/billing/pending/${year}/${month}`,
+        accessToken ?? undefined
+      ),
+    enabled: !!accessToken,
+  });
+}
+
+export function useCheckIn() {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuthStore();
+
+  return useMutation({
+    mutationFn: (data: {
+      childId: string;
+      date?: string;
+      slotId?: string;
+      billingType?: 'PREPAID' | 'POSTPAID';
+      notes?: string;
+    }) => api.post<Attendance>('/attendance/check-in', data, accessToken ?? undefined),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'attendance'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'calendar'] });
+    },
+  });
+}
+
+export function useDeleteAttendance() {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuthStore();
+
+  return useMutation({
+    mutationFn: (id: string) =>
+      api.delete(`/attendance/${id}`, accessToken ?? undefined),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'attendance'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'calendar'] });
+    },
+  });
+}
+
+export function useGenerateMonthlyBilling() {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuthStore();
+
+  return useMutation({
+    mutationFn: (data: { childId: string; month: number; year: number }) =>
+      api.post<MonthlyBilling>('/attendance/billing/generate', data, accessToken ?? undefined),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'billing'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'calendar'] });
+    },
+  });
+}
+
+export function useMarkBillingPaid() {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuthStore();
+
+  return useMutation({
+    mutationFn: ({ id, method }: { id: string; method: string }) =>
+      api.post<MonthlyBilling>(`/attendance/billing/${id}/pay`, { method }, accessToken ?? undefined),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'billing'] });
+    },
+  });
+}

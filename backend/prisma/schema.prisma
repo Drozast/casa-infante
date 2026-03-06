@@ -52,6 +52,12 @@ enum AttendanceStatus {
   ABSENT
 }
 
+enum BillingType {
+  PREPAID    // Pagado por adelantado (plan mensual)
+  POSTPAID   // Se cobrará a fin de mes
+  BILLED     // Ya fue incluido en un cobro mensual
+}
+
 enum WorkshopDay {
   TUESDAY
   WEDNESDAY
@@ -82,10 +88,11 @@ model User {
   updatedAt            DateTime  @updatedAt @map("updated_at")
   lastLoginAt          DateTime? @map("last_login_at")
 
-  children           Child[]        @relation("GuardianChildren")
-  attendancesAsStaff Attendance[]   @relation("StaffAttendances")
-  paymentsAsGuardian Payment[]      @relation("GuardianPayments")
-  paymentsAsPayer    Payment[]      @relation("PayerPayments")
+  children           Child[]          @relation("GuardianChildren")
+  attendancesAsStaff Attendance[]     @relation("StaffAttendances")
+  paymentsAsGuardian Payment[]        @relation("GuardianPayments")
+  paymentsAsPayer    Payment[]        @relation("PayerPayments")
+  monthlyBillings    MonthlyBilling[] @relation("GuardianMonthlyBillings")
   notifications      Notification[]
 
   @@map("users")
@@ -122,6 +129,7 @@ model Child {
   bookings            Booking[]
   workshopEnrollments WorkshopEnrollment[]
   observations        ChildObservation[]
+  monthlyBillings     MonthlyBilling[]
 
   @@index([guardianId])
   @@map("children")
@@ -217,6 +225,8 @@ model Attendance {
   checkInTime  DateTime?        @map("check_in_time")
   checkOutTime DateTime?        @map("check_out_time")
   notes        String?          @db.Text
+  billingType  BillingType      @default(POSTPAID) @map("billing_type")
+  slotId       String?          @map("slot_id")
   createdAt    DateTime         @default(now()) @map("created_at")
   updatedAt    DateTime         @updatedAt @map("updated_at")
 
@@ -229,10 +239,15 @@ model Attendance {
   bookingId String?  @unique @map("booking_id")
   booking   Booking? @relation(fields: [bookingId], references: [id])
 
+  monthlyBillingId String?         @map("monthly_billing_id")
+  monthlyBilling   MonthlyBilling? @relation(fields: [monthlyBillingId], references: [id])
+
   @@unique([childId, date])
   @@index([childId])
   @@index([staffId])
   @@index([date])
+  @@index([billingType])
+  @@index([monthlyBillingId])
   @@map("attendances")
 }
 
@@ -292,6 +307,42 @@ model Invoice {
   payment   Payment @relation(fields: [paymentId], references: [id])
 
   @@map("invoices")
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// COBROS MENSUALES (basados en asistencias)
+// ═══════════════════════════════════════════════════════════════════
+
+model MonthlyBilling {
+  id              String        @id @default(cuid())
+  month           Int                                    // 1-12
+  year            Int
+  totalDays       Int           @map("total_days")       // Total de días asistidos
+  pricePerDay     Decimal       @map("price_per_day") @db.Decimal(10, 2)
+  subtotal        Decimal       @db.Decimal(10, 2)
+  discountPercent Decimal?      @map("discount_percent") @db.Decimal(5, 2)
+  discountAmount  Decimal?      @map("discount_amount") @db.Decimal(10, 2)
+  totalAmount     Decimal       @map("total_amount") @db.Decimal(10, 2)
+  status          PaymentStatus @default(PENDING)
+  method          PaymentMethod?
+  paidAt          DateTime?     @map("paid_at")
+  notes           String?       @db.Text
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  childId String @map("child_id")
+  child   Child  @relation(fields: [childId], references: [id])
+
+  guardianId String @map("guardian_id")
+  guardian   User   @relation("GuardianMonthlyBillings", fields: [guardianId], references: [id])
+
+  attendances Attendance[]
+
+  @@unique([childId, month, year])
+  @@index([guardianId])
+  @@index([status])
+  @@index([month, year])
+  @@map("monthly_billings")
 }
 
 // ═══════════════════════════════════════════════════════════════════

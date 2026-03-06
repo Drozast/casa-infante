@@ -2,13 +2,14 @@ import {
   Controller,
   Get,
   Post,
+  Delete,
   Param,
   Body,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { UserRole } from '@prisma/client';
+import { UserRole, PaymentStatus } from '@prisma/client';
 import { AttendanceService } from './attendance.service';
 import { CheckInDto } from './dto/check-in.dto';
 import { CheckOutDto } from './dto/check-out.dto';
@@ -45,7 +46,7 @@ export class AttendanceController {
 
   @Post('check-in')
   @Roles(UserRole.ADMIN, UserRole.STAFF)
-  @ApiOperation({ summary: 'Registrar entrada' })
+  @ApiOperation({ summary: 'Registrar entrada (soporta fecha retroactiva)' })
   async checkIn(
     @CurrentUser('sub') staffId: string,
     @Body() dto: CheckInDto,
@@ -63,6 +64,13 @@ export class AttendanceController {
     return this.attendanceService.checkOut(staffId, dto);
   }
 
+  @Delete(':id')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Eliminar registro de asistencia' })
+  async deleteAttendance(@Param('id') id: string) {
+    return this.attendanceService.deleteAttendance(id);
+  }
+
   @Get('child/:childId')
   @ApiOperation({ summary: 'Historial de asistencia de un niño' })
   async getChildHistory(
@@ -71,6 +79,77 @@ export class AttendanceController {
     @Query('limit') limit?: number,
   ) {
     return this.attendanceService.getChildAttendanceHistory(childId, page, limit);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // CALENDARIO MENSUAL (Vista "Cartulina")
+  // ═══════════════════════════════════════════════════════════════════
+
+  @Get('calendar/:childId/:year/:month')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  @ApiOperation({ summary: 'Calendario mensual de asistencia de un niño' })
+  async getMonthlyCalendar(
+    @Param('childId') childId: string,
+    @Param('year') year: number,
+    @Param('month') month: number,
+  ) {
+    return this.attendanceService.getMonthlyCalendar(childId, +month, +year);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // COBROS MENSUALES
+  // ═══════════════════════════════════════════════════════════════════
+
+  @Get('billing')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Listar cobros mensuales' })
+  async getMonthlyBillings(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('status') status?: PaymentStatus,
+    @Query('month') month?: number,
+    @Query('year') year?: number,
+  ) {
+    return this.attendanceService.getMonthlyBillings(
+      page,
+      limit,
+      status,
+      month ? +month : undefined,
+      year ? +year : undefined,
+    );
+  }
+
+  @Get('billing/pending/:year/:month')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Niños con asistencias pendientes de cobro' })
+  async getChildrenWithPendingBilling(
+    @Param('year') year: number,
+    @Param('month') month: number,
+  ) {
+    return this.attendanceService.getChildrenWithPendingBilling(+month, +year);
+  }
+
+  @Post('billing/generate')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Generar cobro mensual para un niño' })
+  async generateMonthlyBilling(
+    @Body() body: { childId: string; month: number; year: number },
+  ) {
+    return this.attendanceService.generateMonthlyBilling(
+      body.childId,
+      body.month,
+      body.year,
+    );
+  }
+
+  @Post('billing/:id/pay')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Marcar cobro como pagado' })
+  async markBillingAsPaid(
+    @Param('id') id: string,
+    @Body() body: { method: string },
+  ) {
+    return this.attendanceService.markBillingAsPaid(id, body.method);
   }
 
   @Get('report')
