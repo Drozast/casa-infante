@@ -418,3 +418,45 @@ export function useMarkBillingPaid() {
     },
   });
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// CALENDARIO GENERAL (FullCalendar)
+// ═══════════════════════════════════════════════════════════════════
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  start: string;
+  end: string;
+  allDay: boolean;
+  backgroundColor: string;
+  borderColor: string;
+  extendedProps: {
+    childId: string;
+    childName: string;
+    profileImage: string | null;
+    status: string;
+    billingType: 'PREPAID' | 'POSTPAID' | 'BILLED';
+    checkInTime: string | null;
+    checkOutTime: string | null;
+    hasLunch: boolean;
+    hasPickup: boolean;
+    pickupTime: string | null;
+    notes: string | null;
+  };
+}
+
+export function useCalendarEvents(from: string, to: string) {
+  const { accessToken } = useAuthStore();
+
+  return useQuery({
+    queryKey: ['admin', 'calendar-events', from, to],
+    queryFn: () =>
+      api.get<CalendarEvent[]>(
+        `/attendance/calendar-events?from=${from}&to=${to}`,
+        accessToken ?? undefined
+      ),
+    enabled: !!accessToken && !!from && !!to,
+    refetchInterval: 30000, // Auto-refresh cada 30 segundos
+  });
+}

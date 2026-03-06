@@ -9,6 +9,7 @@ import {
   Home,
   Users,
   Calendar,
+  CalendarDays,
   CreditCard,
   CheckCircle,
   Music,
@@ -38,6 +39,7 @@ const guardianNavItems: NavItem[] = [
 
 const adminNavItems: NavItem[] = [
   { href: '/admin', label: 'Dashboard', icon: Home },
+  { href: '/admin/calendario', label: 'Calendario', icon: CalendarDays },
   { href: '/admin/usuarios', label: 'Usuarios', icon: Users },
   { href: '/admin/ninos', label: 'Niños', icon: Users },
   { href: '/admin/reservas', label: 'Reservas', icon: Calendar },

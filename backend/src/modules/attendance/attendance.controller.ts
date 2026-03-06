@@ -173,4 +173,14 @@ export class AttendanceController {
       new Date(to),
     );
   }
+
+  @Get('calendar-events')
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  @ApiOperation({ summary: 'Eventos de calendario (formato FullCalendar)' })
+  async getCalendarEvents(
+    @Query('from') from: string,
+    @Query('to') to: string,
+  ) {
+    return this.attendanceService.getCalendarEvents(from, to);
+  }
 }

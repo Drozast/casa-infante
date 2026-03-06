@@ -657,6 +657,71 @@ export class AttendanceService {
     return { attendances, stats };
   }
 
+  // ═══════════════════════════════════════════════════════════════════
+  // CALENDARIO GENERAL (FullCalendar)
+  // ═══════════════════════════════════════════════════════════════════
+
+  async getCalendarEvents(from: string, to: string) {
+    const attendances = await this.prisma.attendance.findMany({
+      where: {
+        date: {
+          gte: new Date(from),
+          lte: new Date(to),
+        },
+      },
+      include: {
+        child: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            profileImage: true,
+          },
+        },
+      },
+      orderBy: { date: 'asc' },
+    });
+
+    // Transformar a formato FullCalendar
+    return attendances.map((a) => {
+      const dateStr = new Date(a.date).toISOString().split('T')[0];
+
+      // Determinar color según billingType
+      let backgroundColor = '#facc15'; // yellow para POSTPAID
+      let borderColor = '#eab308';
+      if (a.billingType === 'PREPAID') {
+        backgroundColor = '#4ade80'; // green
+        borderColor = '#22c55e';
+      } else if (a.billingType === 'BILLED') {
+        backgroundColor = '#60a5fa'; // blue
+        borderColor = '#3b82f6';
+      }
+
+      return {
+        id: a.id,
+        title: `${a.child.firstName} ${a.child.lastName}`,
+        start: dateStr,
+        end: dateStr,
+        allDay: true,
+        backgroundColor,
+        borderColor,
+        extendedProps: {
+          childId: a.child.id,
+          childName: `${a.child.firstName} ${a.child.lastName}`,
+          profileImage: a.child.profileImage,
+          status: a.status,
+          billingType: a.billingType,
+          checkInTime: a.checkInTime,
+          checkOutTime: a.checkOutTime,
+          hasLunch: a.hasLunch,
+          hasPickup: a.hasPickup,
+          pickupTime: a.pickupTime,
+          notes: a.notes,
+        },
+      };
+    });
+  }
+
   async findAll(page = 1, limit = 20, from?: string, to?: string) {
     const { skip } = getPaginationParams({ page, limit });
 
