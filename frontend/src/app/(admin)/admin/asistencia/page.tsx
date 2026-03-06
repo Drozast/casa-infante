@@ -392,7 +392,9 @@ export default function AdminAttendancePage() {
                                 {/* Iconos de almuerzo y traslado */}
                                 <div className="flex gap-1 mt-1">
                                   {day.attendance.hasLunch && (
-                                    <UtensilsCrossed className="h-3 w-3 text-orange-500" title="Almuerza" />
+                                    <span title="Almuerza">
+                                      <UtensilsCrossed className="h-3 w-3 text-orange-500" />
+                                    </span>
                                   )}
                                   {day.attendance.hasPickup && (
                                     <div className="flex items-center gap-0.5" title={`Traslado ${day.attendance.pickupTime || ''}`}>
