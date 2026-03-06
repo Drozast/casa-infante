@@ -31,7 +31,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Calendar, CheckCircle, Clock, DollarSign, Plus, Trash2, UserCheck } from 'lucide-react';
-import { toast } from 'sonner';
+import { useToast } from '@/components/ui/use-toast';
 
 const MONTHS = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -64,15 +64,16 @@ export default function AdminAttendancePage() {
   const deleteAttendance = useDeleteAttendance();
   const generateBilling = useGenerateMonthlyBilling();
   const markPaid = useMarkBillingPaid();
+  const { toast } = useToast();
 
   const handleCheckIn = async (childId: string, date: string, billingType: 'PREPAID' | 'POSTPAID') => {
     try {
       await checkIn.mutateAsync({ childId, date, billingType });
-      toast.success('Asistencia registrada');
+      toast({ title: 'Asistencia registrada', variant: 'default' });
       setIsAddingAttendance(false);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Error al registrar asistencia';
-      toast.error(errorMessage);
+      toast({ title: 'Error', description: errorMessage, variant: 'destructive' });
     }
   };
 
@@ -80,10 +81,10 @@ export default function AdminAttendancePage() {
     if (!confirm('¿Eliminar este registro de asistencia?')) return;
     try {
       await deleteAttendance.mutateAsync(attendanceId);
-      toast.success('Asistencia eliminada');
+      toast({ title: 'Asistencia eliminada', variant: 'default' });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Error al eliminar';
-      toast.error(errorMessage);
+      toast({ title: 'Error', description: errorMessage, variant: 'destructive' });
     }
   };
 
@@ -94,20 +95,20 @@ export default function AdminAttendancePage() {
         month: selectedMonth,
         year: selectedYear,
       });
-      toast.success('Cobro generado exitosamente');
+      toast({ title: 'Cobro generado exitosamente', variant: 'default' });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Error al generar cobro';
-      toast.error(errorMessage);
+      toast({ title: 'Error', description: errorMessage, variant: 'destructive' });
     }
   };
 
   const handleMarkPaid = async (billingId: string, method: string) => {
     try {
       await markPaid.mutateAsync({ id: billingId, method });
-      toast.success('Pago registrado');
+      toast({ title: 'Pago registrado', variant: 'default' });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Error al registrar pago';
-      toast.error(errorMessage);
+      toast({ title: 'Error', description: errorMessage, variant: 'destructive' });
     }
   };
 
